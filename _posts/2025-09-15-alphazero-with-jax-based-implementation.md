@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "AlphaZero with JAX-based Implementation"
-date: 2025-11-15
+date: 2025-09-15
 categories: ai alphazero jax
 ---
 

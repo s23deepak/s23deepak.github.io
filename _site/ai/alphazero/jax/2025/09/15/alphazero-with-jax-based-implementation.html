@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Blog - AlphaZero with JAX-based Implementation</title>
+    <meta name="description" content="Exploring the world of AI, one learning at a time.">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        nav {
+            margin-top: 1rem;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        nav a:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        main {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem 0;
+            background: #333;
+            color: white;
+            margin-top: 2rem;
+        }
+        h1, h2, h3 {
+            color: #667eea;
+        }
+        a {
+            color: #667eea;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .post-list {
+            list-style: none;
+            padding: 0;
+        }
+        .post-list li {
+            margin-bottom: 1rem;
+        }
+        .post-list a {
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+        .post-list .date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AI Blog</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+        </nav>
+    </header>
+    <main>
+        <article>
+    <header>
+        <h1>AlphaZero with JAX-based Implementation</h1>
+        <p>Posted on September 15, 2025</p>
+        
+        <p>Categories: ai, alphazero, jax</p>
+        
+    </header>
+    <div>
+        <h1 id="alphazero-with-jax-based-implementation">AlphaZero with JAX-based Implementation</h1>
+
+<p>This directory contains an implementation of AlphaZero for a custom turn-based strategy game, using <a href="https://jax.readthedocs.io/en/latest/">JAX</a> for high-performance computation and parallelization. Monte Carlo Tree Search (MCTS) is combined with a convolutional neural network (CNN) for policy and value prediction. JAX is used to accelerate neural network operations and enable efficient parallelization across devices like GPUs and TPUs.</p>
+
+<h2 id="how-it-works">How It Works</h2>
+
+<ul>
+  <li><strong>JAX</strong> provides just-in-time (JIT) compilation and automatic differentiation to speed up computations and enable efficient batching and parallelization.</li>
+  <li><strong>MCTX</strong> By <a href="https://github.com/google-deepmind/mctx">DeepMind</a>, is Monte Carlo Tree Search implementation in JAX</li>
+  <li><strong>Neural network inference and training</strong> are performed on the GPU/TPU using JAX’s optimized primitives.</li>
+</ul>
+
+<h3 id="jax-jit-and-vectorization">JAX JIT and Vectorization</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@jax.jit</code>: Compiles the function for efficient execution on CPU/GPU/TPU, eliminating Python overhead.</li>
+  <li><code class="language-plaintext highlighter-rouge">jax.vmap</code>: Automatically vectorizes the function to handle batches of inputs efficiently, enabling parallel processing of multiple game states.</li>
+</ul>
+
+<h4 id="effect-on-utilization">Effect on Utilization</h4>
+
+<ul>
+  <li><strong>CPU Utilization</strong>: MCTS remains CPU-bound, but JAX’s JIT compilation reduces overhead in neural network calls.</li>
+  <li><strong>GPU/TPU Utilization</strong>: JAX enables high utilization by compiling operations to optimized kernels and supporting batch processing. Multiple MCTS simulations can be batched together for inference, improving hardware efficiency.</li>
+  <li><strong>Parallelization</strong>: JAX’s <code class="language-plaintext highlighter-rouge">pmap</code> can distribute computations across multiple devices if available, further increasing throughput.</li>
+</ul>
+
+<p><strong>Note:</strong> JAX’s functional programming paradigm requires careful state management and <a href="https://docs.jax.dev/en/latest/notebooks/Common_Gotchas_in_JAX.html#pure-functions">pure functions</a>, but it provides significant performance gains for numerical computations in AlphaZero.</p>
+
+<h2 id="observations">Observations</h2>
+
+<ul>
+  <li><strong>GPU/TPU Utilization</strong>: JAX maximizes hardware utilization through compilation and vectorization, making neural network operations much faster than in pure NumPy implementations.</li>
+  <li><strong>Scalability</strong>: JAX’s design allows for easy scaling to multiple GPUs or TPUs, providing better performance than CPU-only implementations.</li>
+</ul>
+
+    </div>
+</article>
+    </main>
+    <footer>
+        <p>&copy; 2025 AI Blog. Powered by Jekyll.</p>
+    </footer>
+</body>
+</html>

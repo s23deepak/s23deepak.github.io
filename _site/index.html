@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ site.title }} - {{ page.title }}</title>
-    <meta name="description" content="{{ site.description }}">
+    <title>AI Blog - Home</title>
+    <meta name="description" content="Exploring the world of AI, one learning at a time.">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -83,17 +83,42 @@
 </head>
 <body>
     <header>
-        <h1>{{ site.title }}</h1>
+        <h1>AI Blog</h1>
         <nav>
             <a href="/">Home</a>
             <a href="/about">About</a>
         </nav>
     </header>
     <main>
-        {{ content }}
+        <h1 id="welcome-to-my-ai-journey">Welcome to My AI Journey!</h1>
+
+<p>I’m an <strong>AI enthusiast</strong>, deeply curious about the inner workings of artificial intelligence. I’m constantly exploring new techniques that tackle emerging challenges in the field.</p>
+
+<p>In my journey so far, I’ve developed a Supervised Reinforcement Learning (SRL) fine-tuning framework using Unsloth, built custom data pipelines with Meta’s Synthetic-Data-Kit and vLLM, and designed step-wise reward functions for dense RL. Currently, I’m contributing to the open-source Transformer Reinforcement Learning library—working to integrate SRL algorithms for broader adoption in the community.</p>
+
+<p>My interests span machine learning pipelines, large language models (LLMs), reinforcement learning, MLOps, and open-source AI systems. I’m especially excited about agentic AI, model optimization, cloud training workflows, and collaborative community projects.</p>
+
+<p>Here, I’ll be sharing my learnings, insights, and discoveries as I dive deeper into the world of AI—including technical write-ups, project updates, and practical strategies.
+Feel free to explore and join the conversation!</p>
+<h2 id="latest-posts">Latest Posts</h2>
+
+<ul class="post-list">
+
+  <li>
+    <a href="/ai/llm/vllm/2025/11/14/how-vllm-solves-out-of-memory-errors-in-llms.html">How vLLM Solves Out-Of-Memory Errors in LLMs</a>
+    <span class="date">November 14, 2025</span>
+  </li>
+
+  <li>
+    <a href="/ai/alphazero/jax/2025/09/15/alphazero-with-jax-based-implementation.html">AlphaZero with JAX-based Implementation</a>
+    <span class="date">September 15, 2025</span>
+  </li>
+
+</ul>
+
     </main>
     <footer>
-        <p>&copy; 2025 {{ site.title }}. Powered by Jekyll.</p>
+        <p>&copy; 2025 AI Blog. Powered by Jekyll.</p>
     </footer>
 </body>
 </html>

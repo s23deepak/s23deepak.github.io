@@ -15,6 +15,11 @@ Here, I'll be sharing my learnings, insights, and discoveries as I dive deeper i
 Feel free to explore and join the conversation!
 ## Latest Posts
 
+<ul class="post-list">
 {% for post in site.posts %}
-- [{{ post.title }}]({{ post.url }}) - {{ post.date | date: "%B %d, %Y" }}
+  <li>
+    <a href="{{ post.url }}">{{ post.title }}</a>
+    <span class="date">{{ post.date | date: "%B %d, %Y" }}</span>
+  </li>
 {% endfor %}
+</ul>
