@@ -13,7 +13,10 @@ During LLM inference, the model stores key-value (KV) representations of all pre
 
 ### Three Types of Memory Waste
 
-![alt text](memory_waste.png)
+<figure>
+	<img src="{{ '/assets/images/memory_waste.png' | relative_url }}" alt="Memory waste illustration" style="max-width:100%;height:auto;display:block;margin:0.5rem 0;">
+	<figcaption style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Illustration of memory waste types</figcaption>
+</figure>
 
 Traditional memory management for LLM inference suffers from three critical inefficiencies:
 
@@ -28,7 +31,10 @@ Different requests have varying sequence lengths, creating unusable gaps between
 
 ## The Solution: PagedAttention
 
-![alt text](pagedattention_solution.png)
+<figure>
+	<img src="{{ '/assets/images/pagedattention_solution.png' | relative_url }}" alt="PagedAttention solution" style="max-width:100%;height:auto;display:block;margin:0.5rem 0;">
+	<figcaption style="color:#666;font-size:0.9rem;margin-bottom:1rem;">PagedAttention: KV blocks and block tables</figcaption>
+</figure>
 
 vLLM introduces PagedAttention, which fundamentally reimagines how KV cache memory is managed. Instead of requiring contiguous memory blocks, PagedAttention partitions the KV cache into fixed-size blocks, allowing sequences to occupy non-contiguous memory locations—similar to how operating systems manage virtual memory.
 
