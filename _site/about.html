@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About</title>
+    <title>AI Blog - About</title>
     <meta name="description" content="Exploring the world of AI, one learning at a time.">
     <style>
         body {
@@ -24,6 +24,8 @@
         header h1 {
             margin: 0;
             font-size: 2.5rem;
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.35);
         }
         nav {
             margin-top: 1rem;
@@ -48,6 +50,36 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 2rem;
         }
+        /* Content wrapper for tighter control over elements like code blocks */
+        .content {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        /* Code block / syntax highlighting styles (Rouge token classes) */
+        .highlight {
+            background: #0b1220;
+            color: #cbd5e1;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow: auto;
+            margin: 1rem 0;
+            font-family: 'Source Code Pro', 'Fira Code', Menlo, Monaco, monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .highlight pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+
+        /* Rouge token color mappings (common classes used by Rouge) */
+        .k { color: #ff7b72; }   /* keyword */
+        .kd { color: #ff7b72; }
+        .v, .nv { color: #9cd37b; } /* variable */
+        .nf { color: #82b1ff; }  /* function name */
+        .nc, .nt { color: #7fffd4; } /* class / type */
+        .s { color: #f1fa8c; }   /* string */
+        .nb, .m, .mi { color: #ffd580; } /* numbers, constants */
+        .na { color: #ffb86b; }  /* attribute */
+        .c, .cm, .cp { color: #7c8c99; font-style: italic; } /* comments */
         footer {
             text-align: center;
             padding: 1rem 0;
@@ -55,8 +87,9 @@
             color: white;
             margin-top: 2rem;
         }
+        /* Headings inside main content should use a readable accent color */
         h1, h2, h3 {
-            color: #667eea;
+            color: #333333;
         }
         a {
             color: #667eea;
@@ -90,8 +123,8 @@
         </nav>
     </header>
     <main>
-        <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class MachineLearningSpecialist:
-    class AboutMe:
+        <div class="content">
+            <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class AboutMe:
     def __init__(self):
         self.name = "Deepak Swaminathan"
         self.status = "Actively looking for full-time roles" 
@@ -99,28 +132,28 @@
         self.location = "Newberry, FL"
 
     def get_current_focus(self):
-        """What I am working on right now as a Freelancer & Researcher"""
+        """What I am working on right now as a Freelancer &amp; Researcher"""
         return {
-            "Freelancing": "Refining LLMs & Statistical Analysis on Medical Data (EEG)",
+            "Freelancing": "Refining LLMs &amp; Statistical Analysis on Medical Data (EEG)",
             "Research": "Supervised Reinforcement Learning (SRL) with Unsloth",
-            "Architecture": "Building Agentic AI workflows with LangGraph & vLLM"
+            "Architecture": "Building Agentic AI workflows with LangGraph &amp; vLLM"
         }
 
     def experience_highlights(self):
         """A quick look at my professional journey"""
         return [
-            "Freelance: Applied Ridge/Lasso regression & evaluated LLM output quality",
-            "Boston University: Research Assistant (RL in C++) & Teaching Assistant (Big Data)",
-            "Sopra Steria: Deployed RAG pipelines (Llama 2) & IAM Security Models (XGBoost)"
+            "Freelance: Applied Ridge/Lasso regression &amp; evaluated LLM output quality",
+            "Boston University: Research Assistant (RL in C++) &amp; Teaching Assistant (Big Data)",
+            "Sopra Steria: Deployed RAG pipelines (Llama 2) &amp; IAM Security Models (XGBoost)"
         ]
 
     def featured_projects(self):
         """Scalable systems I have built"""
         return {
-            "SRL Fine-Tuning": "Developed a Supervised Reinforcement Learning framework using Unsloth & Meta's Synthetic-Data-Kit",
+            "SRL Fine-Tuning": "Developed a Supervised Reinforcement Learning framework using Unsloth &amp; Meta's Synthetic-Data-Kit",
             "Football Researcher": "Agentic AI (CoT/ReAct) for soccer analysis using LangGraph and vLLM",
-            "Game of Tigers & Goats": "AlphaZero agent trained using JAX and Ray on multi-GPU",
-            "Distributed Vision": "Object detection on 1M+ images using PySpark & GCP"
+            "Game of Tigers &amp; Goats": "AlphaZero agent trained using JAX and Ray on multi-GPU",
+            "Distributed Vision": "Object detection on 1M+ images using PySpark &amp; GCP"
         }
 
     def contact_me(self):
@@ -137,6 +170,7 @@ if __name__ == "__main__":
 
 </code></pre></div></div>
 
+        </div>
     </main>
     <footer>
         <p>&copy; 2025 AI Blog. Powered by Jekyll.</p>

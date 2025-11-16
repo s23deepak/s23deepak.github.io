@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://0.0.0.0:4001/feed.xml" rel="self" type="application/atom+xml" /><link href="http://0.0.0.0:4001/" rel="alternate" type="text/html" /><updated>2025-11-15T03:19:27+00:00</updated><id>http://0.0.0.0:4001/feed.xml</id><title type="html">AI Blog</title><subtitle>Exploring the world of AI, one learning at a time.</subtitle><entry><title type="html">How vLLM Solves Out-Of-Memory Errors in LLMs</title><link href="http://0.0.0.0:4001/ai/llm/vllm/2025/11/14/how-vllm-solves-out-of-memory-errors-in-llms.html" rel="alternate" type="text/html" title="How vLLM Solves Out-Of-Memory Errors in LLMs" /><published>2025-11-14T00:00:00+00:00</published><updated>2025-11-14T00:00:00+00:00</updated><id>http://0.0.0.0:4001/ai/llm/vllm/2025/11/14/how-vllm-solves-out-of-memory-errors-in-llms</id><content type="html" xml:base="http://0.0.0.0:4001/ai/llm/vllm/2025/11/14/how-vllm-solves-out-of-memory-errors-in-llms.html"><![CDATA[<h1 id="how-vllm-solves-out-of-memory-errors-in-llms">How vLLM Solves Out-Of-Memory Errors in LLMs</h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://0.0.0.0:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://0.0.0.0:4000/" rel="alternate" type="text/html" /><updated>2025-11-16T05:10:21+00:00</updated><id>http://0.0.0.0:4000/feed.xml</id><title type="html">AI Blog</title><subtitle>Exploring the world of AI, one learning at a time.</subtitle><entry><title type="html">How vLLM Solves Out-Of-Memory Errors in LLMs</title><link href="http://0.0.0.0:4000/2025/11/14/how-vllm-solves-out-of-memory-errors-in-llms.html" rel="alternate" type="text/html" title="How vLLM Solves Out-Of-Memory Errors in LLMs" /><published>2025-11-14T00:00:00+00:00</published><updated>2025-11-14T00:00:00+00:00</updated><id>http://0.0.0.0:4000/2025/11/14/how-vllm-solves-out-of-memory-errors-in-llms</id><content type="html" xml:base="http://0.0.0.0:4000/2025/11/14/how-vllm-solves-out-of-memory-errors-in-llms.html"><![CDATA[<h1 id="how-vllm-solves-out-of-memory-errors-in-llms">How vLLM Solves Out-Of-Memory Errors in LLMs</h1>
 
 <h2 id="understanding-the-problem-kv-cache-memory-challenges">Understanding the Problem: KV Cache Memory Challenges</h2>
 
@@ -6,7 +6,10 @@
 
 <h3 id="three-types-of-memory-waste">Three Types of Memory Waste</h3>
 
-<p><img src="memory_waste.png" alt="alt text" /></p>
+<figure>
+	<img src="../../../../assets/images/memory_waste.png" alt="Memory waste illustration" style="max-width:100%;height:auto;display:block;margin:0.5rem 0;" />
+	<figcaption style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Illustration of memory waste types</figcaption>
+</figure>
 
 <p>Traditional memory management for LLM inference suffers from three critical inefficiencies:</p>
 
@@ -21,7 +24,10 @@ Different requests have varying sequence lengths, creating unusable gaps between
 
 <h2 id="the-solution-pagedattention">The Solution: PagedAttention</h2>
 
-<p><img src="pagedattention_solution.png" alt="alt text" /></p>
+<figure>
+	<img src="../../../../assets/images/pagedattention_solution.png" alt="PagedAttention solution" style="max-width:100%;height:auto;display:block;margin:0.5rem 0;" />
+	<figcaption style="color:#666;font-size:0.9rem;margin-bottom:1rem;">PagedAttention: KV blocks and block tables</figcaption>
+</figure>
 
 <p>vLLM introduces PagedAttention, which fundamentally reimagines how KV cache memory is managed. Instead of requiring contiguous memory blocks, PagedAttention partitions the KV cache into fixed-size blocks, allowing sequences to occupy non-contiguous memory locations—similar to how operating systems manage virtual memory.</p>
 
@@ -42,8 +48,19 @@ Physical blocks are allocated only when needed as sequences grow, rather than pr
 
 <p>For example, consider the prompt “Alan Turing is a computer scientist and mathematician.” This gets partitioned into logical blocks like “Alan Turing is a” and “computer scientist and mathematician.” These logical blocks map to physical blocks that may be scattered across GPU memory. As the model generates new tokens, they’re appended to existing blocks (like “renowned”) or trigger allocation of new blocks on demand.</p>
 
-<h2 id="benefits-preventing-out-of-memory-errors">Benefits: Preventing Out-of-Memory Errors</h2>
+<h2 id="cpu-offloading-of-model-weights">CPU offloading of model weights</h2>
+<p>The CPU offloading technique allows parts of the model weights to be kept in CPU memory and streamed to the GPU on demand during inference, effectively expanding usable GPU memory capacity virtually.</p>
 
+<h3 id="how-cpu-offloading-works-in-vllm">How CPU Offloading Works in vLLM</h3>
+<p>When GPU VRAM fills up, parts of the model weights that are not instantly needed are moved to CPU memory.
+During a forward pass, required weights are moved back to GPU for computation and then possibly offloaded back to CPU.
+This streaming of weights between CPU and GPU happens layer-wise and dynamically to maximize memory usage without crashing due to out-of-memory errors.
+Note : Increasing CPU offloading for model weights can free GPU VRAM for KV cache but does not directly offload the KV cache itself.</p>
+<h3 id="practical-summary">Practical Summary</h3>
+<p>CPU offloading in vLLM helps when the total model + KV cache size exceeds GPU memory by offloading model weights to CPU memory dynamically.
+The KV cache needs to fit on the GPU, so very large KV caches risk out-of-memory even with CPU offload.</p>
+
+<h2 id="prevention-of-out-of-memory-errors">Prevention of Out-of-Memory Errors</h2>
 <p><strong>Dynamic Resource Management</strong><br />
 Instead of failing when a single large contiguous block isn’t available, vLLM can utilize any available blocks scattered across memory. The system dynamically trades sequence length for batch size based on actual available memory.</p>
 
@@ -56,7 +73,16 @@ The total physical cache memory remains statically allocated, providing protecti
 <p><strong>Efficient Cleanup</strong><br />
 When sequences complete, their blocks immediately return to the free pool for reuse by other requests, maximizing memory utilization.</p>
 
-<p>Photos courtesy of <a href="https://www.youtube.com/watch?v=5ZlavKF_98U">Fast LLM Serving with vLLM and PagedAttention</a></p>]]></content><author><name></name></author><category term="ai" /><category term="llm" /><category term="vllm" /><summary type="html"><![CDATA[How vLLM Solves Out-Of-Memory Errors in LLMs]]></summary></entry><entry><title type="html">AlphaZero with JAX-based Implementation</title><link href="http://0.0.0.0:4001/ai/alphazero/jax/2025/09/15/alphazero-with-jax-based-implementation.html" rel="alternate" type="text/html" title="AlphaZero with JAX-based Implementation" /><published>2025-09-15T00:00:00+00:00</published><updated>2025-09-15T00:00:00+00:00</updated><id>http://0.0.0.0:4001/ai/alphazero/jax/2025/09/15/alphazero-with-jax-based-implementation</id><content type="html" xml:base="http://0.0.0.0:4001/ai/alphazero/jax/2025/09/15/alphazero-with-jax-based-implementation.html"><![CDATA[<h1 id="alphazero-with-jax-based-implementation">AlphaZero with JAX-based Implementation</h1>
+<p><strong>Virtual Memory Expansion</strong><br />
+CPU offloading allows model weights to be stored in CPU memory and streamed to GPU on demand, virtually expanding GPU capacity beyond physical VRAM limits.</p>
+
+<p><strong>Dynamic Weight Streaming</strong><br />
+Weights are moved between CPU and GPU dynamically during inference, layer by layer, to ensure only necessary weights are in GPU memory at any time.</p>
+
+<p><strong>Complementary Memory Management</strong><br />
+By offloading model weights, CPU offloading frees GPU VRAM for KV cache management, working alongside PagedAttention to prevent OOM errors in larger models.</p>
+
+<p>Photos courtesy of <a href="https://www.youtube.com/watch?v=5ZlavKF_98U">Fast LLM Serving with vLLM and PagedAttention</a></p>]]></content><author><name></name></author><summary type="html"><![CDATA[How vLLM Solves Out-Of-Memory Errors in LLMs]]></summary></entry><entry><title type="html">AlphaZero with JAX-based Implementation</title><link href="http://0.0.0.0:4000/2025/09/15/alphazero-with-jax-based-implementation.html" rel="alternate" type="text/html" title="AlphaZero with JAX-based Implementation" /><published>2025-09-15T00:00:00+00:00</published><updated>2025-09-15T00:00:00+00:00</updated><id>http://0.0.0.0:4000/2025/09/15/alphazero-with-jax-based-implementation</id><content type="html" xml:base="http://0.0.0.0:4000/2025/09/15/alphazero-with-jax-based-implementation.html"><![CDATA[<h1 id="alphazero-with-jax-based-implementation">AlphaZero with JAX-based Implementation</h1>
 
 <p>This directory contains an implementation of AlphaZero for a custom turn-based strategy game, using <a href="https://jax.readthedocs.io/en/latest/">JAX</a> for high-performance computation and parallelization. Monte Carlo Tree Search (MCTS) is combined with a convolutional neural network (CNN) for policy and value prediction. JAX is used to accelerate neural network operations and enable efficient parallelization across devices like GPUs and TPUs.</p>
 
@@ -90,4 +116,4 @@ When sequences complete, their blocks immediately return to the free pool for re
 <ul>
   <li><strong>GPU/TPU Utilization</strong>: JAX maximizes hardware utilization through compilation and vectorization, making neural network operations much faster than in pure NumPy implementations.</li>
   <li><strong>Scalability</strong>: JAX’s design allows for easy scaling to multiple GPUs or TPUs, providing better performance than CPU-only implementations.</li>
-</ul>]]></content><author><name></name></author><category term="ai" /><category term="alphazero" /><category term="jax" /><summary type="html"><![CDATA[AlphaZero with JAX-based Implementation]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[AlphaZero with JAX-based Implementation]]></summary></entry></feed>

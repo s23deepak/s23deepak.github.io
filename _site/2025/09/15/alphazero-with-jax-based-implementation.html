@@ -24,6 +24,8 @@
         header h1 {
             margin: 0;
             font-size: 2.5rem;
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.35);
         }
         nav {
             margin-top: 1rem;
@@ -48,6 +50,36 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 2rem;
         }
+        /* Content wrapper for tighter control over elements like code blocks */
+        .content {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        /* Code block / syntax highlighting styles (Rouge token classes) */
+        .highlight {
+            background: #0b1220;
+            color: #cbd5e1;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow: auto;
+            margin: 1rem 0;
+            font-family: 'Source Code Pro', 'Fira Code', Menlo, Monaco, monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .highlight pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+
+        /* Rouge token color mappings (common classes used by Rouge) */
+        .k { color: #ff7b72; }   /* keyword */
+        .kd { color: #ff7b72; }
+        .v, .nv { color: #9cd37b; } /* variable */
+        .nf { color: #82b1ff; }  /* function name */
+        .nc, .nt { color: #7fffd4; } /* class / type */
+        .s { color: #f1fa8c; }   /* string */
+        .nb, .m, .mi { color: #ffd580; } /* numbers, constants */
+        .na { color: #ffb86b; }  /* attribute */
+        .c, .cm, .cp { color: #7c8c99; font-style: italic; } /* comments */
         footer {
             text-align: center;
             padding: 1rem 0;
@@ -55,8 +87,9 @@
             color: white;
             margin-top: 2rem;
         }
+        /* Headings inside main content should use a readable accent color */
         h1, h2, h3 {
-            color: #667eea;
+            color: #333333;
         }
         a {
             color: #667eea;
@@ -90,10 +123,13 @@
         </nav>
     </header>
     <main>
-        <article>
+        <div class="content">
+            <article>
     <header>
         <h1>AlphaZero with JAX-based Implementation</h1>
         <p>Posted on September 15, 2025</p>
+        
+        <p>Categories: </p>
         
     </header>
     <div>
@@ -135,6 +171,7 @@
 
     </div>
 </article>
+        </div>
     </main>
     <footer>
         <p>&copy; 2025 AI Blog. Powered by Jekyll.</p>

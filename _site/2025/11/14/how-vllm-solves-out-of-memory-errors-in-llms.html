@@ -24,6 +24,8 @@
         header h1 {
             margin: 0;
             font-size: 2.5rem;
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.35);
         }
         nav {
             margin-top: 1rem;
@@ -48,6 +50,36 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 2rem;
         }
+        /* Content wrapper for tighter control over elements like code blocks */
+        .content {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        /* Code block / syntax highlighting styles (Rouge token classes) */
+        .highlight {
+            background: #0b1220;
+            color: #cbd5e1;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow: auto;
+            margin: 1rem 0;
+            font-family: 'Source Code Pro', 'Fira Code', Menlo, Monaco, monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .highlight pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+
+        /* Rouge token color mappings (common classes used by Rouge) */
+        .k { color: #ff7b72; }   /* keyword */
+        .kd { color: #ff7b72; }
+        .v, .nv { color: #9cd37b; } /* variable */
+        .nf { color: #82b1ff; }  /* function name */
+        .nc, .nt { color: #7fffd4; } /* class / type */
+        .s { color: #f1fa8c; }   /* string */
+        .nb, .m, .mi { color: #ffd580; } /* numbers, constants */
+        .na { color: #ffb86b; }  /* attribute */
+        .c, .cm, .cp { color: #7c8c99; font-style: italic; } /* comments */
         footer {
             text-align: center;
             padding: 1rem 0;
@@ -55,8 +87,9 @@
             color: white;
             margin-top: 2rem;
         }
+        /* Headings inside main content should use a readable accent color */
         h1, h2, h3 {
-            color: #667eea;
+            color: #333333;
         }
         a {
             color: #667eea;
@@ -90,10 +123,13 @@
         </nav>
     </header>
     <main>
-        <article>
+        <div class="content">
+            <article>
     <header>
         <h1>How vLLM Solves Out-Of-Memory Errors in LLMs</h1>
         <p>Posted on November 14, 2025</p>
+        
+        <p>Categories: </p>
         
     </header>
     <div>
@@ -105,7 +141,10 @@
 
 <h3 id="three-types-of-memory-waste">Three Types of Memory Waste</h3>
 
-<p><img src="memory_waste.png" alt="alt text" /></p>
+<figure>
+	<img src="../../../../assets/images/memory_waste.png" alt="Memory waste illustration" style="max-width:100%;height:auto;display:block;margin:0.5rem 0;" />
+	<figcaption style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Illustration of memory waste types</figcaption>
+</figure>
 
 <p>Traditional memory management for LLM inference suffers from three critical inefficiencies:</p>
 
@@ -120,7 +159,10 @@ Different requests have varying sequence lengths, creating unusable gaps between
 
 <h2 id="the-solution-pagedattention">The Solution: PagedAttention</h2>
 
-<p><img src="pagedattention_solution.png" alt="alt text" /></p>
+<figure>
+	<img src="../../../../assets/images/pagedattention_solution.png" alt="PagedAttention solution" style="max-width:100%;height:auto;display:block;margin:0.5rem 0;" />
+	<figcaption style="color:#666;font-size:0.9rem;margin-bottom:1rem;">PagedAttention: KV blocks and block tables</figcaption>
+</figure>
 
 <p>vLLM introduces PagedAttention, which fundamentally reimagines how KV cache memory is managed. Instead of requiring contiguous memory blocks, PagedAttention partitions the KV cache into fixed-size blocks, allowing sequences to occupy non-contiguous memory locations—similar to how operating systems manage virtual memory.</p>
 
@@ -141,8 +183,19 @@ Physical blocks are allocated only when needed as sequences grow, rather than pr
 
 <p>For example, consider the prompt “Alan Turing is a computer scientist and mathematician.” This gets partitioned into logical blocks like “Alan Turing is a” and “computer scientist and mathematician.” These logical blocks map to physical blocks that may be scattered across GPU memory. As the model generates new tokens, they’re appended to existing blocks (like “renowned”) or trigger allocation of new blocks on demand.</p>
 
-<h2 id="benefits-preventing-out-of-memory-errors">Benefits: Preventing Out-of-Memory Errors</h2>
+<h2 id="cpu-offloading-of-model-weights">CPU offloading of model weights</h2>
+<p>The CPU offloading technique allows parts of the model weights to be kept in CPU memory and streamed to the GPU on demand during inference, effectively expanding usable GPU memory capacity virtually.</p>
 
+<h3 id="how-cpu-offloading-works-in-vllm">How CPU Offloading Works in vLLM</h3>
+<p>When GPU VRAM fills up, parts of the model weights that are not instantly needed are moved to CPU memory.
+During a forward pass, required weights are moved back to GPU for computation and then possibly offloaded back to CPU.
+This streaming of weights between CPU and GPU happens layer-wise and dynamically to maximize memory usage without crashing due to out-of-memory errors.
+Note : Increasing CPU offloading for model weights can free GPU VRAM for KV cache but does not directly offload the KV cache itself.</p>
+<h3 id="practical-summary">Practical Summary</h3>
+<p>CPU offloading in vLLM helps when the total model + KV cache size exceeds GPU memory by offloading model weights to CPU memory dynamically.
+The KV cache needs to fit on the GPU, so very large KV caches risk out-of-memory even with CPU offload.</p>
+
+<h2 id="prevention-of-out-of-memory-errors">Prevention of Out-of-Memory Errors</h2>
 <p><strong>Dynamic Resource Management</strong><br />
 Instead of failing when a single large contiguous block isn’t available, vLLM can utilize any available blocks scattered across memory. The system dynamically trades sequence length for batch size based on actual available memory.</p>
 
@@ -155,10 +208,20 @@ The total physical cache memory remains statically allocated, providing protecti
 <p><strong>Efficient Cleanup</strong><br />
 When sequences complete, their blocks immediately return to the free pool for reuse by other requests, maximizing memory utilization.</p>
 
+<p><strong>Virtual Memory Expansion</strong><br />
+CPU offloading allows model weights to be stored in CPU memory and streamed to GPU on demand, virtually expanding GPU capacity beyond physical VRAM limits.</p>
+
+<p><strong>Dynamic Weight Streaming</strong><br />
+Weights are moved between CPU and GPU dynamically during inference, layer by layer, to ensure only necessary weights are in GPU memory at any time.</p>
+
+<p><strong>Complementary Memory Management</strong><br />
+By offloading model weights, CPU offloading frees GPU VRAM for KV cache management, working alongside PagedAttention to prevent OOM errors in larger models.</p>
+
 <p>Photos courtesy of <a href="https://www.youtube.com/watch?v=5ZlavKF_98U">Fast LLM Serving with vLLM and PagedAttention</a></p>
 
     </div>
 </article>
+        </div>
     </main>
     <footer>
         <p>&copy; 2025 AI Blog. Powered by Jekyll.</p>

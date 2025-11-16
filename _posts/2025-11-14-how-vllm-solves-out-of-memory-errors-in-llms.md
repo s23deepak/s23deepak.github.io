@@ -13,7 +13,7 @@ During LLM inference, the model stores key-value (KV) representations of all pre
 ### Three Types of Memory Waste
 
 <figure>
-	<img src="{{ '/assets/images/memory_waste.png' | relative_url }}" alt="Memory waste illustration" style="max-width:100%;height:auto;display:block;margin:0.5rem 0;">
+	<img src="../../../../assets/images/memory_waste.png" alt="Memory waste illustration" style="max-width:100%;height:auto;display:block;margin:0.5rem 0;">
 	<figcaption style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Illustration of memory waste types</figcaption>
 </figure>
 
@@ -31,7 +31,7 @@ Different requests have varying sequence lengths, creating unusable gaps between
 ## The Solution: PagedAttention
 
 <figure>
-	<img src="{{ '/assets/images/pagedattention_solution.png' | relative_url }}" alt="PagedAttention solution" style="max-width:100%;height:auto;display:block;margin:0.5rem 0;">
+	<img src="../../../../assets/images/pagedattention_solution.png" alt="PagedAttention solution" style="max-width:100%;height:auto;display:block;margin:0.5rem 0;">
 	<figcaption style="color:#666;font-size:0.9rem;margin-bottom:1rem;">PagedAttention: KV blocks and block tables</figcaption>
 </figure>
 
@@ -54,8 +54,19 @@ During attention computation, PagedAttention efficiently fetches KV blocks from 
 
 For example, consider the prompt "Alan Turing is a computer scientist and mathematician." This gets partitioned into logical blocks like "Alan Turing is a" and "computer scientist and mathematician." These logical blocks map to physical blocks that may be scattered across GPU memory. As the model generates new tokens, they're appended to existing blocks (like "renowned") or trigger allocation of new blocks on demand.
 
-## Benefits: Preventing Out-of-Memory Errors
+## CPU offloading of model weights
+The CPU offloading technique allows parts of the model weights to be kept in CPU memory and streamed to the GPU on demand during inference, effectively expanding usable GPU memory capacity virtually.
 
+### How CPU Offloading Works in vLLM
+When GPU VRAM fills up, parts of the model weights that are not instantly needed are moved to CPU memory.
+During a forward pass, required weights are moved back to GPU for computation and then possibly offloaded back to CPU.
+This streaming of weights between CPU and GPU happens layer-wise and dynamically to maximize memory usage without crashing due to out-of-memory errors.
+Note : Increasing CPU offloading for model weights can free GPU VRAM for KV cache but does not directly offload the KV cache itself.
+### Practical Summary
+CPU offloading in vLLM helps when the total model + KV cache size exceeds GPU memory by offloading model weights to CPU memory dynamically.
+The KV cache needs to fit on the GPU, so very large KV caches risk out-of-memory even with CPU offload.
+
+## Prevention of Out-of-Memory Errors
 **Dynamic Resource Management**  
 Instead of failing when a single large contiguous block isn't available, vLLM can utilize any available blocks scattered across memory. The system dynamically trades sequence length for batch size based on actual available memory.
 
@@ -67,5 +78,14 @@ The total physical cache memory remains statically allocated, providing protecti
 
 **Efficient Cleanup**  
 When sequences complete, their blocks immediately return to the free pool for reuse by other requests, maximizing memory utilization. 
+
+**Virtual Memory Expansion**  
+CPU offloading allows model weights to be stored in CPU memory and streamed to GPU on demand, virtually expanding GPU capacity beyond physical VRAM limits.
+
+**Dynamic Weight Streaming**  
+Weights are moved between CPU and GPU dynamically during inference, layer by layer, to ensure only necessary weights are in GPU memory at any time.
+
+**Complementary Memory Management**  
+By offloading model weights, CPU offloading frees GPU VRAM for KV cache management, working alongside PagedAttention to prevent OOM errors in larger models.
 
 Photos courtesy of [Fast LLM Serving with vLLM and PagedAttention](https://www.youtube.com/watch?v=5ZlavKF_98U)
