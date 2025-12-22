@@ -4,7 +4,6 @@ Training language models for **complex, multi-step reasoning** remains a fundame
 
 Here I share my understanding of **Supervised Reinforcement Learning (SRL)**, a fine-tuning framework proposed by Google, which reframes reasoning as a **step-wise decision-making problem** and provides dense, stable supervision for learning structured reasoning.
 
----
 
 ## Why Standard Fine-Tuning Struggles with Reasoning
 
@@ -27,7 +26,6 @@ Outcome-based reinforcement learning methods, such as RL with verifiable rewards
 
 As a result, many complex reasoning tasks become effectively **intractable** under purely outcome-based objectives.
 
----
 
 ## Core Idea of Supervised Reinforcement Learning (SRL)
 
@@ -44,13 +42,12 @@ Key ideas:
 - Each step is treated as an **action**
 - The model receives a **reward at every step**, not just at the end
 
----
 
 ## How SRL Works (High-Level Overview)
 
 The figure below illustrates SRL's step-wise training procedure, where partial trajectories are used to supervise each reasoning step independently.
 
-![SRL Step-Wise Training](../assets/images/SRL%20step-wise.png)
+![SRL Step-Wise Training](/assets/images/SRL%20step-wise.png)
 
 *Image generated using Google's Nano Banana*
 
@@ -61,7 +58,6 @@ At each step *k*, the policy model generates two components:
 
 While the internal monologue is not supervised or compared to the teacher, the `<think>` tag enforces a clear separation between private reasoning and externally evaluated actions. Only the step action contributes to the reward signal.
 
----
 
 ## Comparing Training Paradigms
 
@@ -71,7 +67,6 @@ While the internal monologue is not supervised or compared to the teacher, the `
 | **SRL** | Yes | Step-wise similarity | Reasoning steps |
 | **RLVR / GRPO** | No | Final verifiable reward | Outcome correctness |
 
----
 
 ## Step-Wise Training Data Construction
 
@@ -88,7 +83,6 @@ The model is trained to predict: **y_step_k**
 
 This transforms a single expert solution into many training examples that teach the model how to proceed correctly from different intermediate states.
 
----
 
 ## Supervising Reasoning Steps (Not Final Answers)
 
@@ -111,7 +105,6 @@ The model generates:
 Only the action is compared with the teacher's action.  
 The internal reasoning remains free and unsupervised.
 
----
 
 ## Step-Wise Reward via Sequence Similarity
 
@@ -145,7 +138,6 @@ r(ŷ, y) = R(ŷ, y)   if output follows format
         = -1        otherwise
 ```
 
----
 
 ## Dynamic Sampling for SRL
 
@@ -159,7 +151,6 @@ std({r₁, r₂, ...}) > ε
 
 This ensures training focuses on examples that meaningfully distinguish correct and incorrect reasoning behavior.
 
----
 
 ## Practical Insights from the Authors
 
@@ -174,7 +165,6 @@ In some tasks, multiple reasoning orders may be logically valid (e.g., A → B �
 - Using **answer augmentation**, where multiple teacher trajectories are generated per step, further improves robustness
 - The reward is taken as the **maximum similarity score across teacher variants**, allowing flexibility in reasoning order
 
----
 
 ### Combining Intermediate and Final Rewards
 
@@ -186,7 +176,6 @@ The authors explored combining step-wise SRL rewards with final outcome rewards 
 
 This staged strategy avoids instability while preserving both step-wise correctness and goal achievement.
 
----
 
 ## Key Takeaways
 

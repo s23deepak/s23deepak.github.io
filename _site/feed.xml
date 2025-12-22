@@ -1,10 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://s23deepak.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://s23deepak.github.io/" rel="alternate" type="text/html" /><updated>2025-12-22T07:11:28+00:00</updated><id>https://s23deepak.github.io/feed.xml</id><title type="html">AI Blog</title><subtitle>Exploring the world of AI, one learning at a time.</subtitle><entry><title type="html">My Understanding Of Supervised Reinforcement Learning</title><link href="https://s23deepak.github.io/2025/12/22/my-understanding-of-supervised-reinforcement-learning.html" rel="alternate" type="text/html" title="My Understanding Of Supervised Reinforcement Learning" /><published>2025-12-22T00:00:00+00:00</published><updated>2025-12-22T00:00:00+00:00</updated><id>https://s23deepak.github.io/2025/12/22/my-understanding-of-supervised-reinforcement-learning</id><content type="html" xml:base="https://s23deepak.github.io/2025/12/22/my-understanding-of-supervised-reinforcement-learning.html"><![CDATA[<h1 id="supervised-reinforcement-learning-srl-fine-tuning-reasoning-models-step-by-step">Supervised Reinforcement Learning (SRL): Fine-Tuning Reasoning Models Step by Step</h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://s23deepak.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://s23deepak.github.io/" rel="alternate" type="text/html" /><updated>2025-12-22T07:21:37+00:00</updated><id>https://s23deepak.github.io/feed.xml</id><title type="html">AI Blog</title><subtitle>Exploring the world of AI, one learning at a time.</subtitle><entry><title type="html">My Understanding Of Supervised Reinforcement Learning</title><link href="https://s23deepak.github.io/2025/12/22/my-understanding-of-supervised-reinforcement-learning.html" rel="alternate" type="text/html" title="My Understanding Of Supervised Reinforcement Learning" /><published>2025-12-22T00:00:00+00:00</published><updated>2025-12-22T00:00:00+00:00</updated><id>https://s23deepak.github.io/2025/12/22/my-understanding-of-supervised-reinforcement-learning</id><content type="html" xml:base="https://s23deepak.github.io/2025/12/22/my-understanding-of-supervised-reinforcement-learning.html"><![CDATA[<h1 id="supervised-reinforcement-learning-srl-fine-tuning-reasoning-models-step-by-step">Supervised Reinforcement Learning (SRL): Fine-Tuning Reasoning Models Step by Step</h1>
 
 <p>Training language models for <strong>complex, multi-step reasoning</strong> remains a fundamental challenge. In such tasks, a single incorrect intermediate step can derail the entire reasoning chain—even if many parts of the solution are correct. Unfortunately, most standard fine-tuning approaches fail to handle this gracefully.</p>
 
 <p>Here I share my understanding of <strong>Supervised Reinforcement Learning (SRL)</strong>, a fine-tuning framework proposed by Google, which reframes reasoning as a <strong>step-wise decision-making problem</strong> and provides dense, stable supervision for learning structured reasoning.</p>
-
-<hr />
 
 <h2 id="why-standard-fine-tuning-struggles-with-reasoning">Why Standard Fine-Tuning Struggles with Reasoning</h2>
 
@@ -31,8 +29,6 @@
 
 <p>As a result, many complex reasoning tasks become effectively <strong>intractable</strong> under purely outcome-based objectives.</p>
 
-<hr />
-
 <h2 id="core-idea-of-supervised-reinforcement-learning-srl">Core Idea of Supervised Reinforcement Learning (SRL)</h2>
 
 <p>SRL reframes problem solving as a <strong>sequential decision-making process</strong>.</p>
@@ -52,13 +48,11 @@
   <li>The model receives a <strong>reward at every step</strong>, not just at the end</li>
 </ul>
 
-<hr />
-
 <h2 id="how-srl-works-high-level-overview">How SRL Works (High-Level Overview)</h2>
 
 <p>The figure below illustrates SRL’s step-wise training procedure, where partial trajectories are used to supervise each reasoning step independently.</p>
 
-<p><img src="../assets/images/SRL%20step-wise.png" alt="SRL Step-Wise Training" /></p>
+<p><img src="/assets/images/SRL%20step-wise.png" alt="SRL Step-Wise Training" /></p>
 
 <p><em>Image generated using Google’s Nano Banana</em></p>
 
@@ -70,8 +64,6 @@
 </ol>
 
 <p>While the internal monologue is not supervised or compared to the teacher, the <code class="language-plaintext highlighter-rouge">&lt;think&gt;</code> tag enforces a clear separation between private reasoning and externally evaluated actions. Only the step action contributes to the reward signal.</p>
-
-<hr />
 
 <h2 id="comparing-training-paradigms">Comparing Training Paradigms</h2>
 
@@ -106,8 +98,6 @@
   </tbody>
 </table>
 
-<hr />
-
 <h2 id="step-wise-training-data-construction">Step-Wise Training Data Construction</h2>
 
 <p>SRL uses a powerful <strong>teacher model</strong> θ_expert to generate expert solution trajectories.</p>
@@ -121,8 +111,6 @@ For each step <em>k</em> ∈ {1, …, N-1}:</p>
 <p>The model is trained to predict: <strong>y_step_k</strong></p>
 
 <p>This transforms a single expert solution into many training examples that teach the model how to proceed correctly from different intermediate states.</p>
-
-<hr />
 
 <h2 id="supervising-reasoning-steps-not-final-answers">Supervising Reasoning Steps (Not Final Answers)</h2>
 
@@ -147,8 +135,6 @@ For each step <em>k</em> ∈ {1, …, N-1}:</p>
 
 <p>Only the action is compared with the teacher’s action.<br />
 The internal reasoning remains free and unsupervised.</p>
-
-<hr />
 
 <h2 id="step-wise-reward-via-sequence-similarity">Step-Wise Reward via Sequence Similarity</h2>
 
@@ -184,8 +170,6 @@ The internal reasoning remains free and unsupervised.</p>
         = -1        otherwise
 </code></pre></div></div>
 
-<hr />
-
 <h2 id="dynamic-sampling-for-srl">Dynamic Sampling for SRL</h2>
 
 <p>Not all training samples provide useful learning signals.</p>
@@ -196,8 +180,6 @@ The internal reasoning remains free and unsupervised.</p>
 </code></pre></div></div>
 
 <p>This ensures training focuses on examples that meaningfully distinguish correct and incorrect reasoning behavior.</p>
-
-<hr />
 
 <h2 id="practical-insights-from-the-authors">Practical Insights from the Authors</h2>
 
@@ -214,8 +196,6 @@ The internal reasoning remains free and unsupervised.</p>
   <li>The reward is taken as the <strong>maximum similarity score across teacher variants</strong>, allowing flexibility in reasoning order</li>
 </ul>
 
-<hr />
-
 <h3 id="combining-intermediate-and-final-rewards">Combining Intermediate and Final Rewards</h3>
 
 <p>The authors explored combining step-wise SRL rewards with final outcome rewards (RLVR). However, this introduced the challenge of <strong>reward balancing</strong>.</p>
@@ -227,8 +207,6 @@ The internal reasoning remains free and unsupervised.</p>
 </ol>
 
 <p>This staged strategy avoids instability while preserving both step-wise correctness and goal achievement.</p>
-
-<hr />
 
 <h2 id="key-takeaways">Key Takeaways</h2>
 
