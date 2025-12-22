@@ -1,0 +1,246 @@
+<h1 id="supervised-reinforcement-learning-srl-fine-tuning-reasoning-models-step-by-step">Supervised Reinforcement Learning (SRL): Fine-Tuning Reasoning Models Step by Step</h1>
+
+<p>Training language models for <strong>complex, multi-step reasoning</strong> remains a fundamental challenge. In such tasks, a single incorrect intermediate step can derail the entire reasoning chain—even if many parts of the solution are correct. Unfortunately, most standard fine-tuning approaches fail to handle this gracefully.</p>
+
+<p>Here I share my understanding of <strong>Supervised Reinforcement Learning (SRL)</strong>, a fine-tuning framework proposed by Google, which reframes reasoning as a <strong>step-wise decision-making problem</strong> and provides dense, stable supervision for learning structured reasoning.</p>
+
+<hr />
+
+<h2 id="why-standard-fine-tuning-struggles-with-reasoning">Why Standard Fine-Tuning Struggles with Reasoning</h2>
+
+<h3 id="limitations-of-supervised-fine-tuning-sft">Limitations of Supervised Fine-Tuning (SFT)</h3>
+
+<p>Supervised Fine-Tuning (SFT) trains models using next-token prediction over full expert solutions. While effective for surface-level imitation, SFT enforces <strong>rigid token-level copying</strong>:</p>
+
+<ul>
+  <li>The model must reproduce the <em>entire</em> expert trajectory exactly</li>
+  <li>Any deviation—even if logically valid—is penalized</li>
+  <li>Generalization beyond the training data is limited</li>
+</ul>
+
+<h3 id="limitations-of-outcome-based-rl-rlvr--grpo">Limitations of Outcome-Based RL (RLVR / GRPO)</h3>
+
+<p>Outcome-based reinforcement learning methods, such as RL with verifiable rewards (RLVR), optimize only for the <strong>final answer</strong>:</p>
+
+<ul>
+  <li>Intermediate reasoning is ignored</li>
+  <li>Partially correct solutions still receive zero or negative reward</li>
+  <li>Sparse rewards lead to unstable training</li>
+  <li>Long-horizon reasoning problems become difficult to explore</li>
+</ul>
+
+<p>As a result, many complex reasoning tasks become effectively <strong>intractable</strong> under purely outcome-based objectives.</p>
+
+<hr />
+
+<h2 id="core-idea-of-supervised-reinforcement-learning-srl">Core Idea of Supervised Reinforcement Learning (SRL)</h2>
+
+<p>SRL reframes problem solving as a <strong>sequential decision-making process</strong>.</p>
+
+<p>Instead of:</p>
+<ul>
+  <li>Imitating the entire expert trajectory (SFT), or</li>
+  <li>Optimizing only the final outcome (RLVR),</li>
+</ul>
+
+<p><strong>SRL trains the model to reproduce the sequence of key reasoning actions</strong> underlying expert solutions, using an RL-style objective with <strong>step-wise supervision</strong>.</p>
+
+<p>Key ideas:</p>
+<ul>
+  <li>Expert demonstrations are decomposed into <strong>meaningful reasoning steps</strong></li>
+  <li>Each step is treated as an <strong>action</strong></li>
+  <li>The model receives a <strong>reward at every step</strong>, not just at the end</li>
+</ul>
+
+<hr />
+
+<h2 id="how-srl-works-high-level-overview">How SRL Works (High-Level Overview)</h2>
+
+<p>The figure below illustrates SRL’s step-wise training procedure, where partial trajectories are used to supervise each reasoning step independently.</p>
+
+<p><img src="../assets/images/SRL%20step-wise.png" alt="SRL Step-Wise Training" /></p>
+
+<p><em>Image generated using Google’s Nano Banana</em></p>
+
+<p>At each step <em>k</em>, the policy model generates two components:</p>
+
+<ol>
+  <li>An internal monologue, explicitly encapsulated within <code class="language-plaintext highlighter-rouge">&lt;think&gt;...&lt;/think&gt;</code> tags.</li>
+  <li>A step action <em>âₖ</em>, representing the model’s external reasoning decision.</li>
+</ol>
+
+<p>While the internal monologue is not supervised or compared to the teacher, the <code class="language-plaintext highlighter-rouge">&lt;think&gt;</code> tag enforces a clear separation between private reasoning and externally evaluated actions. Only the step action contributes to the reward signal.</p>
+
+<hr />
+
+<h2 id="comparing-training-paradigms">Comparing Training Paradigms</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Needs Teacher Demonstration</th>
+      <th>Reward Type</th>
+      <th>What It Trains</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SFT</strong></td>
+      <td>Yes</td>
+      <td>None</td>
+      <td>Full trajectory imitation</td>
+    </tr>
+    <tr>
+      <td><strong>SRL</strong></td>
+      <td>Yes</td>
+      <td>Step-wise similarity</td>
+      <td>Reasoning steps</td>
+    </tr>
+    <tr>
+      <td><strong>RLVR / GRPO</strong></td>
+      <td>No</td>
+      <td>Final verifiable reward</td>
+      <td>Outcome correctness</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="step-wise-training-data-construction">Step-Wise Training Data Construction</h2>
+
+<p>SRL uses a powerful <strong>teacher model</strong> θ_expert to generate expert solution trajectories.</p>
+
+<p>Given a solution with <strong>N reasoning steps</strong>, SRL constructs <strong>N − 1 partial trajectories</strong>.<br />
+For each step <em>k</em> ∈ {1, …, N-1}:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>x_step_k = [x, y_step_1, ..., y_step_{k-1}]
+</code></pre></div></div>
+
+<p>The model is trained to predict: <strong>y_step_k</strong></p>
+
+<p>This transforms a single expert solution into many training examples that teach the model how to proceed correctly from different intermediate states.</p>
+
+<hr />
+
+<h2 id="supervising-reasoning-steps-not-final-answers">Supervising Reasoning Steps (Not Final Answers)</h2>
+
+<p>The teacher trajectory is converted into a sequence of <strong>actions</strong>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a₁, a₂, a₃, ..., aₖ
+</code></pre></div></div>
+
+<p>Each <em>aₖ</em> represents a meaningful reasoning decision.</p>
+
+<p>At step <em>k</em>, the policy model is given:</p>
+<ul>
+  <li>The original query</li>
+  <li>The context of all previous steps <em>a₁ … aₖ₋₁</em></li>
+</ul>
+
+<p>The model generates:</p>
+<ol>
+  <li>An internal reasoning trace (kept private)</li>
+  <li>A <strong>step action</strong> <em>âₖ</em></li>
+</ol>
+
+<p>Only the action is compared with the teacher’s action.<br />
+The internal reasoning remains free and unsupervised.</p>
+
+<hr />
+
+<h2 id="step-wise-reward-via-sequence-similarity">Step-Wise Reward via Sequence Similarity</h2>
+
+<p>For each step <em>k</em>:</p>
+
+<ul>
+  <li>Model action: <em>âₖ</em></li>
+  <li>Teacher action: <em>aₖ</em></li>
+</ul>
+
+<p>The reward is computed using a <strong>sequence similarity function</strong>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rₖ = R(ŷ_step_k, y_step_k) = 2M / T
+</code></pre></div></div>
+
+<p>Where:</p>
+<ul>
+  <li><strong>T</strong> = total number of elements in both sequences combined</li>
+  <li><strong>M</strong> = total number of elements in all non-overlapping matching blocks</li>
+</ul>
+
+<p>The similarity is computed by first identifying the longest contiguous matching subsequence and then recursively searching the remaining segments.</p>
+
+<p>Although SRL provides supervised, step-wise rewards, optimization is performed using a reinforcement learning objective. Specifically, the paper employs Group Relative Policy Optimization (GRPO) with a KL-divergence penalty that constrains the policy from drifting too far from a reference model.</p>
+
+<p>This combination allows SRL to benefit from dense supervision while retaining the stability guarantees of modern RL fine-tuning methods.</p>
+
+<h3 id="format-enforcement">Format Enforcement</h3>
+
+<p>If the model output fails to follow the required format, a negative reward is assigned:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>r(ŷ, y) = R(ŷ, y)   if output follows format
+        = -1        otherwise
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="dynamic-sampling-for-srl">Dynamic Sampling for SRL</h2>
+
+<p>Not all training samples provide useful learning signals.</p>
+
+<p>If all rollouts for a sample yield rewards with near-zero variance, the resulting advantage is weak. SRL therefore filters such samples and retains a sample only if:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>std({r₁, r₂, ...}) &gt; ε
+</code></pre></div></div>
+
+<p>This ensures training focuses on examples that meaningfully distinguish correct and incorrect reasoning behavior.</p>
+
+<hr />
+
+<h2 id="practical-insights-from-the-authors">Practical Insights from the Authors</h2>
+
+<h3 id="out-of-order-reasoning-steps">Out-of-Order Reasoning Steps</h3>
+
+<p>What if the model uses a different but correct reasoning order?</p>
+
+<p>In some tasks, multiple reasoning orders may be logically valid (e.g., A → B → C vs. B → A → C).</p>
+
+<p><strong>Insights from the authors:</strong></p>
+<ul>
+  <li>Providing <strong>step titles or step-level prompts</strong> from the teacher helps align student behavior</li>
+  <li>Using <strong>answer augmentation</strong>, where multiple teacher trajectories are generated per step, further improves robustness</li>
+  <li>The reward is taken as the <strong>maximum similarity score across teacher variants</strong>, allowing flexibility in reasoning order</li>
+</ul>
+
+<hr />
+
+<h3 id="combining-intermediate-and-final-rewards">Combining Intermediate and Final Rewards</h3>
+
+<p>The authors explored combining step-wise SRL rewards with final outcome rewards (RLVR). However, this introduced the challenge of <strong>reward balancing</strong>.</p>
+
+<p><strong>Final approach used in the paper:</strong></p>
+<ol>
+  <li>Train the model using <strong>SRL</strong> to learn structured reasoning</li>
+  <li>Fine-tune using <strong>RLVR</strong> to optimize final outcomes</li>
+</ol>
+
+<p>This staged strategy avoids instability while preserving both step-wise correctness and goal achievement.</p>
+
+<hr />
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ul>
+  <li>SRL reframes reasoning as <strong>sequential decision-making</strong></li>
+  <li>It provides <strong>dense, stable supervision</strong> at every reasoning step</li>
+  <li>Internal reasoning is free and not directly supervised</li>
+  <li>Training scales efficiently and generalizes better than SFT</li>
+  <li>A practical pipeline is <strong>SRL → RLVR</strong></li>
+</ul>
+
+<p>SRL bridges the gap between imitation learning and outcome-based reinforcement learning, making it a powerful framework for training reasoning-capable language models.</p>
+
+<h2 id="references">References</h2>
+<p><a href="https://doi.org/10.48550/arXiv.2510.25992">Supervised Reinforcement Learning: From Expert Trajectories to Step-wise Reasoning.</a></p>

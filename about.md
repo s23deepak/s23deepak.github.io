@@ -2,7 +2,8 @@
 layout: default
 title: About
 ---
-```
+
+```python
 class AboutMe:
     def __init__(self):
         self.name = "Deepak Swaminathan"

@@ -42,7 +42,7 @@
             background-color: rgba(255,255,255,0.2);
         }
         main {
-            max-width: 800px;
+            max-width: 1100px;
             margin: 2rem auto;
             padding: 0 1rem;
             background: white;
@@ -52,7 +52,7 @@
         }
         /* Content wrapper for tighter control over elements like code blocks */
         .content {
-            max-width: 760px;
+            max-width: 1040px;
             margin: 0 auto;
         }
 
@@ -124,50 +124,50 @@
     </header>
     <main>
         <div class="content">
-            <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class AboutMe:
-    def __init__(self):
-        self.name = "Deepak Swaminathan"
-        self.status = "Actively looking for full-time roles" 
-        self.current_role = "Freelance ML Specialist"
-        self.location = "Newberry, FL"
+            <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AboutMe</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Deepak Swaminathan</span><span class="sh">"</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">status</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Actively looking for full-time roles</span><span class="sh">"</span> 
+        <span class="n">self</span><span class="p">.</span><span class="n">current_role</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Freelance ML Specialist</span><span class="sh">"</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">location</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Newberry, FL</span><span class="sh">"</span>
 
-    def get_current_focus(self):
-        """What I am working on right now as a Freelancer &amp; Researcher"""
-        return {
-            "Freelancing": "Refining LLMs &amp; Statistical Analysis on Medical Data (EEG)",
-            "Research": "Supervised Reinforcement Learning (SRL) with Unsloth",
-            "Architecture": "Building Agentic AI workflows with LangGraph &amp; vLLM"
-        }
+    <span class="k">def</span> <span class="nf">get_current_focus</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">What I am working on right now as a Freelancer &amp; Researcher</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">Freelancing</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Refining LLMs &amp; Statistical Analysis on Medical Data (EEG)</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">Research</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Supervised Reinforcement Learning (SRL) with Unsloth</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">Architecture</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Building Agentic AI workflows with LangGraph &amp; vLLM</span><span class="sh">"</span>
+        <span class="p">}</span>
 
-    def experience_highlights(self):
-        """A quick look at my professional journey"""
-        return [
-            "Freelance: Applied Ridge/Lasso regression &amp; evaluated LLM output quality",
-            "Boston University: Research Assistant (RL in C++) &amp; Teaching Assistant (Big Data)",
-            "Sopra Steria: Deployed RAG pipelines (Llama 2) &amp; IAM Security Models (XGBoost)"
-        ]
+    <span class="k">def</span> <span class="nf">experience_highlights</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">A quick look at my professional journey</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="sh">"</span><span class="s">Freelance: Applied Ridge/Lasso regression &amp; evaluated LLM output quality</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">Boston University: Research Assistant (RL in C++) &amp; Teaching Assistant (Big Data)</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">Sopra Steria: Deployed RAG pipelines (Llama 2) &amp; IAM Security Models (XGBoost)</span><span class="sh">"</span>
+        <span class="p">]</span>
 
-    def featured_projects(self):
-        """Scalable systems I have built"""
-        return {
-            "SRL Fine-Tuning": "Developed a Supervised Reinforcement Learning framework using Unsloth &amp; Meta's Synthetic-Data-Kit",
-            "Football Researcher": "Agentic AI (CoT/ReAct) for soccer analysis using LangGraph and vLLM",
-            "Game of Tigers &amp; Goats": "AlphaZero agent trained using JAX and Ray on multi-GPU",
-            "Distributed Vision": "Object detection on 1M+ images using PySpark &amp; GCP"
-        }
+    <span class="k">def</span> <span class="nf">featured_projects</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Scalable systems I have built</span><span class="sh">"""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">SRL Fine-Tuning</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Developed a Supervised Reinforcement Learning framework using Unsloth &amp; Meta</span><span class="sh">'</span><span class="s">s Synthetic-Data-Kit</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">Football Researcher</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Agentic AI (CoT/ReAct) for soccer analysis using LangGraph and vLLM</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">Game of Tigers &amp; Goats</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">AlphaZero agent trained using JAX and Ray on multi-GPU</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">Distributed Vision</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Object detection on 1M+ images using PySpark &amp; GCP</span><span class="sh">"</span>
+        <span class="p">}</span>
 
-    def contact_me(self):
-        return {
-            "Email": "23.deepak.s@gmail.com",
-            "LinkedIn": "[linkedin.com/in/deepak-swaminathan](https://www.linkedin.com/in/deepak-swaminathan-90a707153/)",
-            "Goal": "Ready to join a team tackling complex AI/ML challenges."
-        }
+    <span class="k">def</span> <span class="nf">contact_me</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">Email</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">23.deepak.s@gmail.com</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">LinkedIn</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">[linkedin.com/in/deepak-swaminathan](https://www.linkedin.com/in/deepak-swaminathan-90a707153/)</span><span class="sh">"</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">Goal</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Ready to join a team tackling complex AI/ML challenges.</span><span class="sh">"</span>
+        <span class="p">}</span>
 
-if __name__ == "__main__":
-    me = AboutMe()
-    print(f"Is {me.name} available for hire? {me.status}")
-    # Output: Is Deepak Swaminathan available for hire? Actively looking for full-time roles
-
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">me</span> <span class="o">=</span> <span class="nc">AboutMe</span><span class="p">()</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Is </span><span class="si">{</span><span class="n">me</span><span class="p">.</span><span class="n">name</span><span class="si">}</span><span class="s"> available for hire? </span><span class="si">{</span><span class="n">me</span><span class="p">.</span><span class="n">status</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="c1"># Output: Is Deepak Swaminathan available for hire? Actively looking for full-time roles
+</span>
 </code></pre></div></div>
 
         </div>
