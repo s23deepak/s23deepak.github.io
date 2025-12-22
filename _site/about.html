@@ -71,15 +71,30 @@
         .highlight pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
 
         /* Rouge token color mappings (common classes used by Rouge) */
-        .k { color: #ff7b72; }   /* keyword */
-        .kd { color: #ff7b72; }
-        .v, .nv { color: #9cd37b; } /* variable */
-        .nf { color: #82b1ff; }  /* function name */
-        .nc, .nt { color: #7fffd4; } /* class / type */
-        .s { color: #f1fa8c; }   /* string */
-        .nb, .m, .mi { color: #ffd580; } /* numbers, constants */
-        .na { color: #ffb86b; }  /* attribute */
-        .c, .cm, .cp { color: #7c8c99; font-style: italic; } /* comments */
+        .k { color: #ff7b72; }   /* keyword - RED */
+        .kd { color: #ff7b72; }  /* keyword declaration */
+        .n { color: #cbd5e1; }   /* name - default light text */
+        .na { color: #ffb86b; }  /* attribute - ORANGE */
+        .nb { color: #ffd580; }  /* built-in - YELLOW */
+        .nc { color: #7fffd4; }  /* class - CYAN */
+        .nf { color: #82b1ff; }  /* function name - BLUE */
+        .nt { color: #7fffd4; }  /* type - CYAN */
+        .nv { color: #9cd37b; }  /* variable - GREEN */
+        .v { color: #9cd37b; }   /* variable - GREEN */
+        .o { color: #cbd5e1; }   /* operator - default light text */
+        .p { color: #cbd5e1; }   /* punctuation - default light text */
+        .m { color: #ffd580; }   /* number - YELLOW */
+        .mi { color: #ffd580; }  /* number integer - YELLOW */
+        .mf { color: #ffd580; }  /* number float - YELLOW */
+        .sh { color: #cbd5e1; }  /* string delimiter - light text */
+        .s { color: #f1fa8c; }   /* string - YELLOW/LIME */
+        .sa { color: #f1fa8c; }  /* string affix - YELLOW */
+        .sr { color: #f1fa8c; }  /* string regex - YELLOW */
+        .ss { color: #f1fa8c; }  /* string symbol - YELLOW */
+        .c { color: #7c8c99; font-style: italic; }   /* comment - GRAY italic */
+        .cm { color: #7c8c99; font-style: italic; }  /* comment multiline - GRAY italic */
+        .cp { color: #7c8c99; font-style: italic; }  /* comment preproc - GRAY italic */
+        .c1 { color: #7c8c99; font-style: italic; }  /* comment single - GRAY italic */
         footer {
             text-align: center;
             padding: 1rem 0;
