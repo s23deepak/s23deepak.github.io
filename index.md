@@ -3,17 +3,29 @@ layout: default
 title: Home
 ---
 
-# Welcome to My AI Journey!
+# Deepak Swaminathan
 
-I'm an **AI enthusiast**, deeply curious about the inner workings of artificial intelligence. I'm constantly exploring new techniques that tackle emerging challenges in the field.
+_I turned a deep curiosity about intelligent systems into hands-on practice — fine-tuning language models, shipping agentic workflows, and writing open-source RL tooling that other engineers can actually use.  
+The work that excites me most lives at the intersection of reinforcement learning and large language models: teaching models to reason step-by-step through dense reward signals rather than imitating demonstrations.  
+I believe the fastest path to mastery is building in public, sharing failures as openly as successes, and staying skeptical of hype long enough to find what is genuinely useful._
 
-In my journey so far, I've developed a Supervised Reinforcement Learning (SRL) fine-tuning framework using Unsloth, built custom data pipelines with Meta's Synthetic-Data-Kit and vLLM, and designed step-wise reward functions for dense RL. Currently, I'm contributing to the open-source Transformer Reinforcement Learning library—working to integrate SRL algorithms for broader adoption in the community.
+**[linkedin.com/in/deepak-swaminathan →](https://www.linkedin.com/in/deepak-swaminathan-90a707153/)**
 
-My interests span machine learning pipelines, large language models (LLMs), reinforcement learning, MLOps, and open-source AI systems. I’m especially excited about agentic AI, model optimization, cloud training workflows, and collaborative community projects.
+---
 
-Here, I'll be sharing my learnings, insights, and discoveries as I dive deeper into the world of AI—including technical write-ups, project updates, and practical strategies.
-Feel free to explore and join the conversation!
-## Latest Posts
+## Now
+
+**Freelance ML Specialist** — Refining LLMs & running statistical analysis on medical EEG data for a clinical research client.
+
+**Open-Source Contributor @ [TRL](https://github.com/huggingface/trl)** — Integrating Supervised Reinforcement Learning (SRL) algorithms so the community can adopt them without rebuilding from scratch.
+
+**Researcher** — Building a step-wise reward SRL fine-tuning framework on top of [Unsloth](https://github.com/unslothai/unsloth) and Meta's Synthetic-Data-Kit; custom data pipelines with vLLM for scalable rollout generation.
+
+---
+
+## Writing
+
+Deep dives on LLMs, reinforcement learning, and practical ML engineering.
 
 <ul class="post-list">
 {% for post in site.posts %}
@@ -23,3 +35,36 @@ Feel free to explore and join the conversation!
   </li>
 {% endfor %}
 </ul>
+
+---
+
+## Open Source
+
+[SRL Fine-Tuning Framework](https://github.com/s23deepak/srl-finetuning) · [Football Researcher](https://github.com/s23deepak/football-researcher) · [Game of Tigers & Goats](https://github.com/s23deepak/game-of-tigers-and-goats) · [Distributed Vision](https://github.com/s23deepak/distributed-vision)
+
+Contributing to: [huggingface/trl](https://github.com/huggingface/trl)
+
+---
+
+## Highlights
+
+| Highlight | Detail |
+|---|---|
+| **SRL Fine-Tuning** | Supervised Reinforcement Learning framework using Unsloth & Meta's Synthetic-Data-Kit with step-wise reward functions |
+| **Football Researcher** | Agentic AI system (CoT / ReAct) for soccer match analysis using LangGraph and vLLM |
+| **Game of Tigers & Goats** | AlphaZero-style agent trained with JAX and Ray on multi-GPU hardware |
+| **Distributed Vision** | Object detection pipeline over 1M+ images using PySpark and GCP |
+| **Boston University** | Research Assistant (RL in C++) and Teaching Assistant (Big Data Analytics) |
+| **Sopra Steria** | Deployed RAG pipelines (Llama 2) and IAM security models (XGBoost) in production |
+
+---
+
+[![GitHub Stats](https://github-readme-stats.vercel.app/api?username=s23deepak&show_icons=true&theme=github_dark&hide_border=true&bg_color=161b22)](https://github.com/s23deepak)
+
+---
+
+<div class="social-links">
+  <a href="https://github.com/s23deepak">GitHub</a>
+  <a href="https://www.linkedin.com/in/deepak-swaminathan-90a707153/">LinkedIn</a>
+  <a href="mailto:23.deepak.s@gmail.com">Email</a>
+</div>
