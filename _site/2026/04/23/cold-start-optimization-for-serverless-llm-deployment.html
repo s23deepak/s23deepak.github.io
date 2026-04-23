@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Blog - Cold Start Optimization for Serverless LLM Deployment</title>
+    <meta name="description" content="Exploring the world of AI, one learning at a time.">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+        }
+        nav {
+            margin-top: 1rem;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        nav a:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        main {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        .content {
+            max-width: 1040px;
+            margin: 0 auto;
+        }
+        .highlight {
+            background: #0b1220;
+            color: #cbd5e1;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow: auto;
+            margin: 1rem 0;
+            font-family: 'Source Code Pro', 'Fira Code', Menlo, Monaco, monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .highlight pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+        .k { color: #ff7b72; }
+        .kd { color: #ff7b72; }
+        .n { color: #cbd5e1; }
+        .na { color: #ffb86b; }
+        .nb { color: #ffd580; }
+        .nc { color: #7fffd4; }
+        .nf { color: #82b1ff; }
+        .nt { color: #7fffd4; }
+        .nv { color: #9cd37b; }
+        .v { color: #9cd37b; }
+        .o { color: #cbd5e1; }
+        .p { color: #cbd5e1; }
+        .m { color: #ffd580; }
+        .mi { color: #ffd580; }
+        .mf { color: #ffd580; }
+        .sh { color: #cbd5e1; }
+        .s { color: #f1fa8c; }
+        .sa { color: #f1fa8c; }
+        .sr { color: #f1fa8c; }
+        .ss { color: #f1fa8c; }
+        .c { color: #7c8c99; font-style: italic; }
+        .cm { color: #7c8c99; font-style: italic; }
+        .cp { color: #7c8c99; font-style: italic; }
+        .c1 { color: #7c8c99; font-style: italic; }
+        footer {
+            text-align: center;
+            padding: 1rem 0;
+            background: #333;
+            color: white;
+            margin-top: 2rem;
+        }
+        h1, h2, h3 {
+            color: #333333;
+        }
+        a {
+            color: #667eea;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1rem 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: #667eea;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        figure {
+            margin: 1.5rem 0;
+        }
+        figcaption {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        .architecture-diagram {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AI Blog</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+        </nav>
+    </header>
+    <main>
+        <div class="content">
+            <article>
+    <header>
+        <h1>Cold Start Optimization for Serverless LLM Deployment</h1>
+        <p>Posted on April 23, 2026</p>
+    </header>
+    <div>
+        <h1 id="cold-start-optimization-for-serverless-llm-deployment">Cold Start Optimization for Serverless LLM Deployment</h1>
+
+<p><strong>5 minutes → 5-10 seconds with GPU snapshots, sleep mode, and weight caching</strong></p>
+
+<hr />
+
+<h2 id="the-problem">The Problem</h2>
+
+<p>I built MedSimulation—an AI clinical simulation engine for resident training. It runs a 4B parameter LLM (MedGemma) on serverless GPU via Modal.</p>
+
+<p><strong>The issue:</strong> When the container idles out and shuts down, the next user hits a <strong>5-minute cold boot</strong>:</p>
+<ol>
+  <li>Container spins up</li>
+  <li>Model downloads from HuggingFace (~8GB)</li>
+  <li>Weights load into VRAM</li>
+  <li>vLLM warms up JIT kernels</li>
+  <li>Finally, the user's request processes</li>
+</ol>
+
+<p>Five minutes of dead air is a non-starter for user experience.</p>
+
+<p><strong>Update:</strong> After implementing GPU snapshots with sleep mode, cold starts now take <strong>5-10 seconds</strong>.</p>
+
+<hr />
+
+<h2 id="the-setup">The Setup</h2>
+
+<p>Before optimization:</p>
+
+<div class="highlight">
+<pre><code class="language-python"><span class="na">@app</span><span class="p">.</span><span class="nf">function</span><span class="p">(</span><span class="nv">gpu</span><span class="o">=</span><span class="s">"A10G"</span><span class="p">)</span>
+<span class="na">@modal</span><span class="p">.</span><span class="nf">asgi_app</span><span class="p">()</span>
+<span class="nf">def</span> <span class="nf">serve</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">main</span> <span class="kn">import</span> <span class="nv">app</span>
+    <span class="k">return</span> <span class="nv">app</span>  <span class="c1"># Simple, but 5-min cold start</span></code></pre>
+</div>
+
+<p>After optimization, the architecture looks like:</p>
+
+<div class="architecture-diagram">
+<pre>┌─────────────────┐     ┌──────────────────┐
+│  FastAPI (CPU)  │────▶│  VLLMService     │
+│  Routes, DB     │ RPC │  (GPU, snapshotted)│
+└─────────────────┘     └──────────────────┘
+        ▲                        ▲
+        │                        │
+   scales to zero          wakes on demand</pre>
+</div>
+
+<hr />
+
+<h2 id="optimization-1-pre-cached-model-weights">Optimization 1: Pre-cached Model Weights</h2>
+
+<p><strong>Problem:</strong> Every cold container downloads 8GB from HuggingFace.</p>
+
+<p><strong>Solution:</strong> Store weights in a <strong>Modal Volume</strong>—persistent storage shared across containers.</p>
+
+<div class="highlight">
+<pre><code class="language-python"><span class="c1"># Persistent volume for model weights</span>
+<span class="nv">model_volume</span> <span class="o">=</span> <span class="nv">Volume</span><span class="p">.</span><span class="nf">from_name</span><span class="p">(</span><span class="s">"medsimulation-models"</span><span class="p">,</span> <span class="nv">create_if_missing</span><span class="o">=</span><span class="no">True</span><span class="p">)</span>
+
+<span class="c1"># One-time download (run once before deploying)</span>
+<span class="na">@app</span><span class="p">.</span><span class="nf">function</span><span class="p">(</span><span class="nv">gpu</span><span class="o">=</span><span class="s">"A10G"</span><span class="p">,</span> <span class="nv">volumes</span><span class="o">=</span><span class="p">{</span><span class="s">"/models"</span><span class="o">:</span> <span class="nv">model_volume</span><span class="p">})</span>
+<span class="nf">def</span> <span class="nf">download_model</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">huggingface_hub</span> <span class="kn">import</span> <span class="nv">snapshot_download</span>
+
+    <span class="nf">snapshot_download</span><span class="p">(</span>
+        <span class="nv">repo_id</span><span class="o">=</span><span class="s">"google/medgemma-4b-it"</span><span class="p">,</span>
+        <span class="nv">local_dir</span><span class="o">=</span><span class="s">"/models/medgemma-4b-it"</span><span class="p">,</span>
+        <span class="nv">ignore_patterns</span><span class="o">=</span><span class="p">[</span><span class="s">"*.msgpack"</span><span class="p">,</span> <span class="s">"*.h5"</span><span class="p">,</span> <span class="s">"flax_model*"</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="nf">model_volume</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span></code></pre>
+</div>
+
+<p><strong>Result:</strong> First container downloads once. All subsequent containers mount the volume. <strong>Saves ~2-3 minutes.</strong></p>
+
+<hr />
+
+<h2 id="optimization-2-gpu-memory-snapshots-with-sleep-mode">Optimization 2: GPU Memory Snapshots with Sleep Mode</h2>
+
+<p><strong>Problem:</strong> Even with cached weights, loading into VRAM takes time. Plus, subprocess state doesn't survive snapshot restore.</p>
+
+<p><strong>Solution:</strong> Modal's <code class="highlighter-rouge">enable_memory_snapshot=True</code> captures the entire GPU state after warmup. But there's a critical detail: you need to put vLLM to <strong>sleep</strong> before snapshotting.</p>
+
+<div class="highlight">
+<pre><code class="language-python"><span class="na">@app</span><span class="p">.</span><span class="nf">cls</span><span class="p">(</span>
+    <span class="nv">gpu</span><span class="o">=</span><span class="s">"A10G"</span><span class="p">,</span>
+    <span class="nv">volumes</span><span class="o">=</span><span class="p">{</span><span class="s">"/models"</span><span class="o">:</span> <span class="nv">model_volume</span><span class="p">,</span> <span class="s">"/data"</span><span class="o">:</span> <span class="nv">data_volume</span><span class="p">},</span>
+    <span class="nv">enable_memory_snapshot</span><span class="o">=</span><span class="no">True</span><span class="p">,</span>
+    <span class="nv">experimental_options</span><span class="o">=</span><span class="p">{</span><span class="s">"enable_gpu_snapshot"</span><span class="o">:</span> <span class="no">True</span><span class="p">},</span>  <span class="c1"># Key flag</span>
+<span class="p">)</span>
+<span class="nc">class</span> <span class="nc">VLLMService</span><span class="p">:</span>
+    <span class="na">@modal</span><span class="p">.</span><span class="nf">enter</span><span class="p">(</span><span class="nv">snap</span><span class="o">=</span><span class="no">True</span><span class="p">)</span>
+    <span class="nf">def</span> <span class="nf">start</span><span class="p">(</span><span class="nv">self</span><span class="p">):</span>
+        <span class="s">"""Start vLLM and warmup—this state gets snapshotted."""</span>
+        <span class="kn">import</span> <span class="nn">os</span><span class="p">,</span> <span class="nn">subprocess</span>
+
+        <span class="nv">model_path</span> <span class="o">=</span> <span class="s">"/models/medgemma-4b-it"</span>
+
+        <span class="nv">cmd</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s">"vllm"</span><span class="p">,</span> <span class="s">"serve"</span><span class="p">,</span> <span class="nv">model_path</span><span class="p">,</span>
+            <span class="s">"--host"</span><span class="p">,</span> <span class="s">"0.0.0.0"</span><span class="p">,</span>
+            <span class="s">"--port"</span><span class="p">,</span> <span class="s">"8001"</span><span class="p">,</span>
+            <span class="s">"--dtype"</span><span class="p">,</span> <span class="s">"bfloat16"</span><span class="p">,</span>
+            <span class="s">"--gpu-memory-utilization"</span><span class="p">,</span> <span class="s">"0.8"</span><span class="p">,</span>
+            <span class="s">"--max-model-len"</span><span class="p">,</span> <span class="s">"4096"</span><span class="p">,</span>
+            <span class="s">"--enforce-eager"</span><span class="p">,</span>           <span class="c1"># Skip torch.compile</span>
+            <span class="s">"--disable-custom-all-reduce"</span><span class="p">,</span>
+            <span class="s">"--enable-prefix-caching"</span><span class="p">,</span>
+            <span class="s">"--enable-sleep-mode"</span><span class="p">,</span>       <span class="c1"># Critical for snapshots!</span>
+        <span class="p">]</span>
+
+        <span class="nv">env</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="o">**</span><span class="nv">os</span><span class="p">.</span><span class="nv">environ</span><span class="p">,</span>
+            <span class="s">"VLLM_SERVER_DEV_MODE"</span><span class="o">:</span> <span class="s">"1"</span><span class="p">,</span>  <span class="c1"># Required for sleep mode</span>
+            <span class="s">"NCCL_DEBUG"</span><span class="o">:</span> <span class="s">"WARN"</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="nv">self</span><span class="p">.</span><span class="nv">vllm_proc</span> <span class="o">=</span> <span class="nf">subprocess</span><span class="p">.</span><span class="nf">Popen</span><span class="p">(</span><span class="nv">cmd</span><span class="p">,</span> <span class="nv">env</span><span class="o">=</span><span class="nv">env</span><span class="p">)</span>
+        <span class="nf">wait_for_vllm</span><span class="p">(</span><span class="mi">8001</span><span class="p">)</span>
+        <span class="nf">warmup_vllm</span><span class="p">(</span><span class="mi">8001</span><span class="p">)</span>  <span class="c1"># Trigger JIT before snapshot</span>
+        <span class="nf">sleep_vllm</span><span class="p">(</span><span class="mi">8001</span><span class="p">)</span>   <span class="c1"># Put vLLM to sleep - NOW snapshot captures clean state</span></code></pre>
+</div>
+
+<p>The key insight is that <strong>sleep mode matters</strong>. When vLLM enters sleep:</p>
+<ol>
+  <li>Model weights offload to CPU (clean state for checkpoint)</li>
+  <li>KV cache clears (no stale context)</li>
+  <li>CUDA quiesces (no active kernels)</li>
+  <li>Process stays alive but checkpointable</li>
+</ol>
+
+<p>Without <code class="highlighter-rouge">sleep()</code>, the subprocess is in an unknown state with active CUDA operations. Modal's checkpoint API can’t cleanly capture that, so you get a full cold start on restore.</p>
+
+<p><strong>Result:</strong> Cold start drops from ~5 minutes to <strong>~5-15 seconds</strong>.</p>
+
+<hr />
+
+<h2 id="optimization-3-vllm-flags-that-matter">Optimization 3: vLLM Flags That Matter</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Flag</th>
+      <th>Value</th>
+      <th>Why</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">--enforce-eager</code></td>
+      <td>Set</td>
+      <td>Skips <code class="highlighter-rouge">torch.compile</code> (adds 60-90s at boot)</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">--max-num-seqs</code></td>
+      <td>16</td>
+      <td>Lower = less initial memory pressure</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">--disable-custom-all-reduce</code></td>
+      <td>Set</td>
+      <td>Reduces NCCL init overhead</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">--enable-prefix-caching</code></td>
+      <td>Set</td>
+      <td>RadixAttention for KV cache reuse</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>For single-GPU deployments, <code class="highlighter-rouge">--enforce-eager</code> is the biggest win. You lose some throughput, but cold start matters more for low-traffic apps.</p>
+
+<hr />
+
+<h2 id="optimization-4-two-tier-architecture">Optimization 4: Two-Tier Architecture</h2>
+
+<p>Run FastAPI on CPU, proxy inference to GPU:</p>
+
+<div class="highlight">
+<pre><code class="language-python"><span class="na">@app</span><span class="p">.</span><span class="nf">function</span><span class="p">(</span>
+    <span class="nv">gpu</span><span class="o">=</span><span class="no">None</span><span class="p">,</span>      <span class="c1"># CPU-only</span>
+    <span class="nv">cpu</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="nv">memory</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+    <span class="nv">scaledown_window</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>  <span class="c1"># Shut down after 5 min idle</span>
+<span class="p">)</span>
+<span class="na">@modal</span><span class="p">.</span><span class="nf">asgi_app</span><span class="p">()</span>
+<span class="nf">def</span> <span class="nf">serve</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">src.simulation.vllm_client</span> <span class="kn">import</span> <span class="nv">ModalVLLMClient</span>
+
+    <span class="nv">_vc</span><span class="p">.</span><span class="nv">_injected_client</span> <span class="o">=</span> <span class="nf">ModalVLLMClient</span><span class="p">(</span>
+        <span class="nv">vllm_service_instance</span><span class="o">=</span><span class="nf">VLLMService</span><span class="p">(),</span>
+        <span class="nv">model</span><span class="o">=</span><span class="s">"google/medgemma-4b-it"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">main</span> <span class="kn">import</span> <span class="nv">app</span> <span class="nv">as</span> <span class="nv">backend_app</span>
+    <span class="k">return</span> <span class="nv">backend_app</span></code></pre>
+</div>
+
+<p><strong>Result:</strong> CPU proxy scales independently. GPU wakes only for inference.</p>
+
+<hr />
+
+<h2 id="optimization-5-fine-tuning--prompt-engineering">Optimization 5: Fine-Tuning &gt; Prompt Engineering</h2>
+
+<p><strong>Problem:</strong> Patient persona consistency required ~400 tokens of system prompt.</p>
+
+<p><strong>Solution:</strong> Fine-tuned MedGemma-4B on ~200 synthetic Q&amp;A pairs.</p>
+
+<ul>
+  <li>Generated via Claude (patient dialogue: age-appropriate voice, no jargon, emotional states)</li>
+  <li>LoRA fine-tuning on RunPod (~$75, 2 hours on A100)</li>
+  <li>System prompt shrank from ~400 → ~80 tokens</li>
+</ul>
+
+<p><strong>Result:</strong> More consistent voice, lower latency, cheaper inference.</p>
+
+<hr />
+
+<h2 id="performance-summary">Performance Summary</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Scenario</th>
+      <th>Cold Start Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Fresh deploy (no volume)</td>
+      <td>~5+ min</td>
+    </tr>
+    <tr>
+      <td>After volume cache</td>
+      <td>~2-3 min</td>
+    </tr>
+    <tr>
+      <td>After snapshot (no sleep)</td>
+      <td>~45 sec (unreliable)</td>
+    </tr>
+    <tr>
+      <td><strong>After snapshot + sleep mode</strong></td>
+      <td><strong>~5-10 sec ✓</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Cost:</strong> ~$0.60/hr when active, $0 at rest.</p>
+
+<h3 id="key-insight">Key Insight</h3>
+
+<p>The sleep mode step is critical. Without it, GPU snapshots are unreliable because:</p>
+<ul>
+  <li>Subprocess state doesn't survive container shutdown</li>
+  <li>Active CUDA kernels can't be checkpointed cleanly</li>
+  <li>vLLM process needs to be in a known quiescent state</li>
+</ul>
+
+<p>After calling <code class="highlighter-rouge">sleep()</code>, the container is in a clean, checkpointable state. Modal captures that, and restore becomes a simple memory copy operation.</p>
+
+<hr />
+
+<h2 id="open-questions">Open Questions</h2>
+
+<p>Curious how others handle this:</p>
+
+<ol>
+  <li><strong>Warm container strategy:</strong> Do you keep at least one GPU warm 24/7? At what traffic threshold?</li>
+  <li><strong>Snapshot reliability:</strong> Anyone using GPU snapshots at scale? How's the failure rate?</li>
+  <li><strong>Platform comparison:</strong> RunPod, Lambda, Massed—how do cold starts compare?</li>
+  <li><strong>vLLM alternatives:</strong> Considering TensorRT-LLM or SGLang for faster boot?</li>
+</ol>
+
+<p>Reach out if you've tackled similar problems.</p>
+
+<hr />
+
+<p><strong>Further Reading:</strong></p>
+<ul>
+  <li><a href="https://modal.com/docs/guide/gpu-snapshots">Modal GPU Snapshots</a></li>
+  <li><a href="https://modal.com/docs/examples/ministral3_inference">Serverless Ministral 3 with vLLM and Modal</a></li>
+</ul>
+
+    </div>
+</article>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2026 AI Blog. Powered by Jekyll.</p>
+    </footer>
+</body>
+</html>
