@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Blog - PitchSideAI</title>
+    <title>AI Blog - Building PitchSideAI: A Technical Walkthrough of an AI Football Broadcast Companion</title>
     <meta name="description" content="Exploring the world of AI, one learning at a time.">
     <style>
         body {
@@ -106,20 +106,40 @@
         a:hover {
             text-decoration: underline;
         }
-        .post-list {
-            list-style: none;
-            padding: 0;
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1rem 0;
         }
-        .post-list li {
-            margin-bottom: 1rem;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
         }
-        .post-list a {
-            text-decoration: none;
-            font-size: 1.2rem;
+        th {
+            background-color: #667eea;
+            color: white;
         }
-        .post-list .date {
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        figure {
+            margin: 1.5rem 0;
+        }
+        figcaption {
             color: #666;
             font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        .architecture-diagram {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid #e0e0e0;
         }
     </style>
 </head>
@@ -135,13 +155,339 @@
         <div class="content">
             <article>
     <header>
-        <h1>PitchSideAI</h1>
+        <h1>Building PitchSideAI: A Technical Walkthrough of an AI Football Broadcast Companion</h1>
         <p>Posted on May 10, 2026</p>
-
-        <p>Categories: </p>
-
     </header>
     <div>
+        <h1 id="building-pitchsideai-a-technical-walkthrough-of-an-ai-football-broadcast-companion">Building PitchSideAI: A Technical Walkthrough of an AI Football Broadcast Companion</h1>
+
+<p>Live football is a hard environment for AI products because the useful answer is almost never just a stat. A commentator might need the historical context behind a rivalry, a fan might want to know why a tactical shift matters, and a broadcast producer might need that insight at the exact moment the game changes.</p>
+
+<p>PitchSideAI was built around that idea: turn match footage, pre-match research, live game state, and natural-language Q&amp;A into one broadcast companion. The project combines a React/Vite frontend, a FastAPI backend, a multi-agent research workflow, WebSocket-driven live sessions, and a vision-language serving path designed for vLLM and AMD ROCm-capable infrastructure.</p>
+
+<p>This walkthrough explains how the system was put together, the main technical decisions, and the pieces that make the demo feel like a real live-sports product rather than a generic chatbot.</p>
+
+<h2 id="the-product-shape">The Product Shape</h2>
+
+<p>The first design decision was to split the app into three connected experiences:</p>
+
+<ol>
+  <li><strong>Fan Lens Broadcast</strong>: a full-screen viewing mode with scoreboard state, automatic trivia cards, voice Q&amp;A, and split-screen answers.</li>
+  <li><strong>Commentator Dashboard</strong>: a production-style workspace with video on one side and a teleprompter of generated narrative beats on the other.</li>
+  <li><strong>Notes Generation Hub</strong>: a pre-match preparation surface where the user enters two teams and runs the agentic research pipeline.</li>
+</ol>
+
+<p>All three views share the same underlying match session. That matters because the app is not just generating isolated responses. It is maintaining context: teams, score, match minute, phase, commentary settings, language preference, generated notes, and the latest tactical vision analysis.</p>
+
+<p>At a high level, the system looks like this:</p>
+
+<div class="architecture-diagram">
+<pre>React / Vite frontend
+  Fan Lens Broadcast
+  Commentator Dashboard
+  Notes Generation Hub
+        |
+        | HTTP, SSE, WebSocket
+        v
+FastAPI backend
+  /api/v1/commentary/prepare-notes
+  /api/v1/frame/analyze
+  /api/v1/video/analyze
+  /api/v1/video/qa
+  /ws/live
+        |
+        v
+Agents, data retrievers, RAG, game state, notes store
+        |
+        v
+LLM / VLM backends
+  vLLM
+  Qwen vision-language models
+  optional OpenAI / Bedrock-compatible paths</pre>
+</div>
+
+<p>The core implementation lives in <code class="highlighter-rouge">api/server.py</code>, <code class="highlighter-rouge">workflows/commentary_notes_workflow.py</code>, <code class="highlighter-rouge">agents/</code>, <code class="highlighter-rouge">models/</code>, <code class="highlighter-rouge">data_sources/</code>, <code class="highlighter-rouge">streaming/</code>, and <code class="highlighter-rouge">frontend/src/</code>.</p>
+
+<h2 id="backend-foundation-fastapi-as-the-live-match-hub">Backend Foundation: FastAPI as the Live Match Hub</h2>
+
+<p>The backend is a FastAPI application that does three jobs:</p>
+
+<ul>
+  <li>Serve request/response APIs for research, frame analysis, video analysis, and Q&amp;A.</li>
+  <li>Maintain long-lived live match sessions through <code class="highlighter-rouge">/ws/live</code>.</li>
+  <li>Stream long-running agent progress back to the browser with server-sent events.</li>
+</ul>
+
+<p>The most important backend abstraction is the <code class="highlighter-rouge">ConnectionManager</code> in <code class="highlighter-rouge">api/server.py</code>. It tracks active WebSocket connections by session, stores generated <code class="highlighter-rouge">NotesStore</code> objects, keeps Q&amp;A runners warm, remembers commentary settings, and broadcasts updates to every connected tab.</p>
+
+<p>That lets a Fan Lens view and a Commentator Dashboard stay synchronized. When the server receives a match event or tactical detection, it can update game state once and fan the resulting commentary, trivia, or teleprompter highlight out to all clients in the same session.</p>
+
+<p>The live WebSocket protocol is intentionally small. The client sends messages such as:</p>
+
+<div class="highlight">
+<pre><code class="language-json">{"type":"init","home_team":"Arsenal","away_team":"Chelsea","sport":"soccer"}
+{"type":"settings_update","bias":0,"excitement":0.7,"knowledge_depth":0.8}
+{"type":"language_switch","language":"es"}
+{"type":"match_event","description":"Goal by Saka 34'"}
+{"type":"tactical_detection","analysis":{"tactical_label":"High Press","confidence":0.82}}
+{"type":"query","text":"Why is Arsenal pressing so high?"}</code></pre>
+</div>
+
+<p>The server responds with normalized events:</p>
+
+<div class="highlight">
+<pre><code class="language-json">{"type":"ready","session_id":"soccer#arsenal#vs#chelsea"}
+{"type":"commentary","text":"...","gameState":{...}}
+{"type":"trivia_card","text":"...","source":"notes"}
+{"type":"beat_highlight","beat_index":3,"confidence":0.86}
+{"type":"answer","answer":"...","overlay_coordinates":{...}}</code></pre>
+</div>
+
+<p>That protocol became the backbone of the app. Everything interactive in the frontend eventually maps to one of those message types.</p>
+
+<h2 id="pre-match-intelligence-the-seven-agent-notes-pipeline">Pre-Match Intelligence: The Seven-Agent Notes Pipeline</h2>
+
+<p>The most important "agentic" part of PitchSideAI is the commentary notes workflow in <code class="highlighter-rouge">workflows/commentary_notes_workflow.py</code>.</p>
+
+<p>Before a match starts, the app needs more than a generic team summary. It needs structured broadcast material: team form, player profiles, recent news, head-to-head history, weather context, key tactical matchups, and narrative beats that can be surfaced later during live play.</p>
+
+<p>The workflow is organized around a shared <code class="highlighter-rouge">CommentaryNotesState</code> object. Each agent writes its output into that state, and the final organizer synthesizes the outputs into a <code class="highlighter-rouge">NotesStore</code>.</p>
+
+<p>The optimized flow is:</p>
+
+<div class="architecture-diagram">
+<pre>1. Initialize
+   - Fetch match schedule and venue when missing.
+
+2. Parallel research phase
+   - NewsAgent
+   - WeatherContextAgent
+   - HistoricalContextAgent
+   - PlayerResearchAgent
+   - TeamFormAgent
+
+3. Dependent tactical phase
+   - MatchupAnalysisAgent waits for player research.
+
+4. Synthesis
+   - CommentaryNoteOrganizerAgent turns all outputs into markdown and narrative beats.</pre>
+</div>
+
+<p>The key lesson here was dependency management. Some work can run immediately: news, weather, history, and team form only need team names or venue context. Matchup analysis, however, needs player lists, so it has to wait for squad research. Running every independent branch with <code class="highlighter-rouge">asyncio.gather()</code> made the pipeline much faster without making the final synthesis less reliable.</p>
+
+<p>The frontend consumes this pipeline over SSE from <code class="highlighter-rouge">/api/v1/commentary/prepare-notes</code>. That gives users a live progress feed instead of a frozen loading screen:</p>
+
+<div class="architecture-diagram">
+<pre>Fetching match schedule and venue...
+Running parallel research phase...
+Initial context gathered
+Squads researched
+Team form analyzed
+Analyzing key matchups...
+Synthesizing commentary notes...
+Commentary notes ready</pre>
+</div>
+
+<p>That progress stream is a small UX detail, but it changes how the product feels. The user can see the agents working, and long-running research becomes understandable instead of mysterious.</p>
+
+<h2 id="data-retrieval-round-robin-sources-with-rate-limits">Data Retrieval: Round-Robin Sources With Rate Limits</h2>
+
+<p>The agents need sports data, but football data sources vary a lot in coverage, authentication, rate limits, and reliability. PitchSideAI wraps them behind <code class="highlighter-rouge">MultiSourceRetriever</code> in <code class="highlighter-rouge">data_sources/multi_source_retriever.py</code>.</p>
+
+<p>The retriever initializes available sources lazily:</p>
+
+<ul>
+  <li>ESPN for fixtures, squads, and general match context.</li>
+  <li>FootballData.org for authenticated football data when an API key is available.</li>
+  <li>Transfermarkt for player profiles and market-value-style context.</li>
+  <li>OneVersusOne for premium player metrics when credentials are configured.</li>
+  <li>Firecrawl as a fallback for current web context.</li>
+</ul>
+
+<p>Each source gets its own rate limiter, and calls are distributed with round-robin selection and failover. This keeps the agents from depending on a single fragile provider. It also makes local development practical because the app can still run with only a subset of optional API keys.</p>
+
+<h2 id="notesstore-turning-research-into-live-lookup">NotesStore: Turning Research Into Live Lookup</h2>
+
+<p>Raw markdown is useful for humans, but the live product needs structured lookup. If a vision model detects a corner, a red card, or a dangerous free kick, the app should quickly find the relevant pre-written narrative beats.</p>
+
+<p>That is why the final notes are stored in <code class="highlighter-rouge">models/notes_store.py</code> as a <code class="highlighter-rouge">NotesStore</code>:</p>
+
+<div class="architecture-diagram">
+<pre>NotesStore
+  raw_markdown
+  beats: List[NarrativeBeat]
+  lookup: Dict[event_tag, List[beat_index]]</pre>
+</div>
+
+<p>On initialization, the store builds an O(1) lookup table from canonical event tags to narrative beat indices. A <code class="highlighter-rouge">TagResolver</code> normalizes labels from the vision model using exact matches, synonyms, and word-boundary matching.</p>
+
+<p>There is also a safety gate for goals. A vision model might describe a "goal chance" or "goalmouth scramble", but the app should not treat that as a real goal unless the score has changed. The resolver can compare previous and current score totals before allowing the canonical <code class="highlighter-rouge">goal</code> tag through.</p>
+
+<p>That small guardrail is important in live sports. False positives are not just incorrect; they break trust immediately.</p>
+
+<h2 id="live-game-state-score-minute-phase-and-event-timeline">Live Game State: Score, Minute, Phase, and Event Timeline</h2>
+
+<p>The <code class="highlighter-rouge">GameState</code> model in <code class="highlighter-rouge">models/game_state.py</code> gives each WebSocket session a lightweight match brain.</p>
+
+<p>It parses free-text event descriptions like:</p>
+
+<div class="architecture-diagram">
+<pre>Kickoff
+Goal by Haaland 34'
+Yellow card for Rice 58'
+Second half begins
+Full-time whistle</pre>
+</div>
+
+<p>From those messages it updates:</p>
+
+<ul>
+  <li>home and away score</li>
+  <li>match minute</li>
+  <li>match phase</li>
+  <li>recent event timeline</li>
+  <li>active players and recent touches when available</li>
+</ul>
+
+<p>The server includes <code class="highlighter-rouge">gameState</code> in commentary broadcasts, which means the frontend does not have to infer score or phase from text. The LLM also gets a compact match-state string when generating commentary, so its responses are grounded in the current state of the match.</p>
+
+<p>This split is deliberate: deterministic parsing handles the scoreboard and timeline, while the model handles language, explanation, and narrative.</p>
+
+<h2 id="vision-and-video-a-hardware-aware-fallback-chain">Vision and Video: A Hardware-Aware Fallback Chain</h2>
+
+<p>The project was built for the AMD Developer Hackathon, so the vision path needed to be serious about GPU serving. The app supports a streaming backend factory in <code class="highlighter-rouge">streaming/factory.py</code> with a two-level fallback chain:</p>
+
+<div class="architecture-diagram">
+<pre>Level 1: StreamingVLM
+  - Best for high-memory GPU sessions such as MI300X-class deployments.
+  - Designed for temporal continuity and streaming video understanding.
+
+Level 2: vLLM frame-by-frame
+  - Practical local and demo fallback.
+  - Uses Qwen vision-language models through an OpenAI-compatible vLLM endpoint.</pre>
+</div>
+
+<p>The backend exposes both frame and video analysis endpoints:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">/api/v1/frame/analyze</code></li>
+  <li><code class="highlighter-rouge">/api/v1/video/analyze</code></li>
+  <li><code class="highlighter-rouge">/api/v1/video/qa</code></li>
+</ul>
+
+<p>For video-capable backends, the server first attempts native video analysis. If a vLLM context-length error occurs, it retries with overlapping native-video windows. If that still fails or the backend does not support native video, it falls back to sampled frames.</p>
+
+<p>That fallback strategy was one of the most practical engineering choices in the project. It lets the same product target powerful AMD GPU infrastructure while still remaining demoable on smaller machines.</p>
+
+<h2 id="qa-combining-voice-vision-context-and-notes">Q&amp;A: Combining Voice, Vision Context, and Notes</h2>
+
+<p>Fan Lens includes a hold-to-ask interaction. The target experience is simple: the user watches the match, holds the mic, asks a question, and gets an answer without leaving the video.</p>
+
+<p>Under the hood, Q&amp;A combines several layers:</p>
+
+<ul>
+  <li>Browser voice capture or typed fallback.</li>
+  <li>Live WebSocket session context.</li>
+  <li>Precomputed <code class="highlighter-rouge">NotesStore</code> material.</li>
+  <li>Latest tactical vision context.</li>
+  <li>Player identification context when available.</li>
+  <li>LLM response generation through the configured backend.</li>
+</ul>
+
+<p>The Q&amp;A path is not just "send text to model." It is session-aware. If the notes pipeline has already generated player and matchup research, the Q&amp;A agent can answer with richer context. If a recent vision detection exists, the answer can refer to what is happening on screen.</p>
+
+<p>The frontend displays answers in a split-screen overlay so the video remains part of the interaction instead of being replaced by a chat panel.</p>
+
+<h2 id="frontend-broadcast-ui-instead-of-chat-ui">Frontend: Broadcast UI Instead of Chat UI</h2>
+
+<p>The React frontend is organized around product surfaces rather than model endpoints:</p>
+
+<div class="architecture-diagram">
+<pre>frontend/src/pages/
+  LandingPage.jsx
+  FanLensBroadcast.jsx
+  CommentatorDashboard.jsx
+  NotesGenerationHub.jsx
+
+frontend/src/components/
+  VideoCanvas.jsx
+  MicButton.jsx
+  Teleprompter.jsx
+  TriviaCard.jsx
+  SplitScreen.jsx
+  ControlsTray.jsx
+  TopNavBar.jsx
+
+frontend/src/contexts/
+  LiveSessionContext.jsx</pre>
+</div>
+
+<p>The frontend design system is called Midnight Stadium. It uses a dark broadcast-style palette with electric lime and gold accents, defined in <code class="highlighter-rouge">frontend/src/design-tokens/tokens.css</code>.</p>
+
+<p>The key frontend decision was to avoid making the app feel like a dashboard wrapped around a video. In Fan Lens mode, the video owns the screen. AI features appear as overlays: scoreboard pill, trivia cards, controls tray, mic button, and answer panel.</p>
+
+<p>The Commentator Dashboard uses a different layout because its user has a different job. It prioritizes a teleprompter, tactical brief, and live commentary feed. The same backend events power both views, but the UI translates those events into different workflows.</p>
+
+<h2 id="deployment-docker-hugging-face-spaces-and-external-inference">Deployment: Docker, Hugging Face Spaces, and External Inference</h2>
+
+<p>PitchSideAI is packaged for Hugging Face Spaces using the Docker SDK. The Docker build compiles the frontend and serves it alongside the FastAPI backend in one container.</p>
+
+<p>The main runtime variables are:</p>
+
+<div class="highlight">
+<pre><code class="language-env">LLM_BACKEND=vllm
+VLLM_BASE_URL=http://localhost:8001
+VLLM_MODEL=Qwen/Qwen2.5-3B-Instruct
+VLLM_VISION_MODEL=Qwen/Qwen2.5-VL-3B-Instruct-AWQ
+AUDIO_VLLM_BASE_URL=http://localhost:8001
+AUDIO_MODEL=Qwen/Qwen2-Audio-7B-Instruct
+VITE_BACKEND_URL=http://localhost:8000</code></pre>
+</div>
+
+<p>For deployment, the Space can keep the web app lightweight while pointing <code class="highlighter-rouge">VLLM_BASE_URL</code> at a GPU inference endpoint. That separation is useful because web serving and model serving have very different resource profiles.</p>
+
+<p>The repository also includes Kubernetes and production deployment notes for a larger version with multiple backend replicas, DynamoDB event storage, OpenSearch RAG, Redis caching, and Bedrock-compatible model paths.</p>
+
+<h2 id="validation-and-reliability-work">Validation and Reliability Work</h2>
+
+<p>For a live demo, the product has to degrade gracefully. The validation work focused on:</p>
+
+<ul>
+  <li>frontend build success</li>
+  <li>Docker build readiness</li>
+  <li>health checks</li>
+  <li>WebSocket drop handling</li>
+  <li>GPU fallback timing</li>
+  <li>audio Q&amp;A latency</li>
+  <li>language switching</li>
+  <li>cold start behavior</li>
+  <li>browser compatibility</li>
+</ul>
+
+<p>The validation report records local targets such as sub-3.5-second audio Q&amp;A, sub-500ms commentary time-to-first-token, 5-7 FPS vision processing, and fallback activation under 30 seconds.</p>
+
+<p>Those numbers are not the final word for every deployment, but they gave the project a concrete reliability target during development.</p>
+
+<h2 id="what-i-would-improve-next">What I Would Improve Next</h2>
+
+<p>The current architecture gets the end-to-end product working, but there are clear next steps:</p>
+
+<ul>
+  <li>Make the LangGraph integration fully real instead of keeping the graph builder as a future-facing hook.</li>
+  <li>Persist <code class="highlighter-rouge">NotesStore</code> and live session state outside process memory for multi-replica deployments.</li>
+  <li>Add stronger source attribution in generated commentary notes.</li>
+  <li>Improve player identification with richer lineup, kit, and positional context.</li>
+  <li>Run longer benchmark suites against AMD MI300X infrastructure with ROCm-native model serving.</li>
+  <li>Add production observability dashboards around WebSocket sessions, agent timings, and VLM fallback rates.</li>
+</ul>
+
+<h2 id="takeaways">Takeaways</h2>
+
+<p>The biggest lesson from building PitchSideAI was that live AI products need structure around the model. The model is important, but the product works because deterministic state, agent workflow boundaries, source-aware retrieval, fallback infrastructure, and broadcast-specific UI all cooperate.</p>
+
+<p>PitchSideAI is not just an LLM answering football questions. It is a match session that prepares before kickoff, watches during play, remembers what has happened, retrieves the right context, and presents the result in the language of a live broadcast.</p>
+
+<p>That is the difference between a sports chatbot and an AI broadcast companion.</p>
 
     </div>
 </article>
