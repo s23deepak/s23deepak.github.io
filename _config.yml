@@ -7,3 +7,6 @@ highlighter: rouge
 plugins:
   - jekyll-feed
   - jekyll-sitemap
+exclude:
+  - about.md
+  - .claude

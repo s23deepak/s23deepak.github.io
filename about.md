@@ -1,6 +1,8 @@
 ---
 layout: default
 title: About
+published: false
+sitemap: false
 ---
 
 ```python
