@@ -3,161 +3,546 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Blog - Cold Start Optimization for Serverless LLM Deployment</title>
-    <meta name="description" content="Exploring the world of AI, one learning at a time.">
+    <title>Cold Start Optimization for Serverless LLM Deployment — Deepak Swaminathan</title>
+    <meta name="description" content="ML/LLM Engineer — agentic workflows, RAG, vLLM inference, and practical AI write-ups.">
+    
+    <!-- Preconnect & Google Fonts: Newsreader (Editorial Serif) & JetBrains Mono (Code) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --bg-canvas: #faf8f5;
+            --bg-surface: #ffffff;
+            --bg-subtle: #f2eee6;
+            --bg-code-inline: #f0ece3;
+            --border-subtle: #e5dfd5;
+            --border-strong: #d0c8bb;
+            --text-primary: #1c1d1f;
+            --text-secondary: #5a5f67;
+            --text-muted: #7e8490;
+            --accent: #1e40af;
+            --accent-hover: #1d4ed8;
+            --accent-subtle: #eff6ff;
+            --tag-bg: #eae4d8;
+            --tag-text: #4a505b;
+            --code-block-bg: #0f141c;
+            --code-block-border: #1f2733;
+            --content-width: 740px;
+            --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-canvas: #121418;
+                --bg-surface: #181b22;
+                --bg-subtle: #1f242e;
+                --bg-code-inline: #202530;
+                --border-subtle: #292f3d;
+                --border-strong: #384256;
+                --text-primary: #edf1f7;
+                --text-secondary: #a2abb9;
+                --text-muted: #717b8c;
+                --accent: #60a5fa;
+                --accent-hover: #93c5fd;
+                --accent-subtle: #172554;
+                --tag-bg: #222838;
+                --tag-text: #9aa4b5;
+                --code-block-bg: #0b0d12;
+                --code-block-border: #222836;
+            }
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 17px;
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
+            font-family: var(--font-sans);
+            line-height: 1.75;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
+            transition: background-color 0.2s ease, color 0.2s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 0;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+        /* Top Navigation Header */
+        header.site-header {
+            border-bottom: 1px solid var(--border-subtle);
+            background: var(--bg-canvas);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(250, 248, 245, 0.88);
         }
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            color: #ffffff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+
+        @media (prefers-color-scheme: dark) {
+            header.site-header {
+                background-color: rgba(18, 20, 24, 0.88);
+            }
         }
-        nav {
+
+        .header-inner {
+            max-width: var(--content-width);
+            margin: 0 auto;
+            padding: 1.15rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand-link {
+            text-decoration: none;
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-title {
+            font-family: var(--font-serif);
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            line-height: 1.2;
+            color: var(--text-primary);
+        }
+
+        .brand-subtitle {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            letter-spacing: 0.02em;
+            margin-top: 0.2rem;
+        }
+
+        nav.site-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        nav.site-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: color 0.15s ease;
+        }
+
+        nav.site-nav a:hover {
+            color: var(--accent);
+        }
+
+        /* Main Content Container */
+        main.site-main {
+            max-width: var(--content-width);
+            margin: 2.75rem auto 4.5rem auto;
+            padding: 0 1.25rem;
+        }
+
+        /* Typography & Headings */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary);
+            font-family: var(--font-serif);
+            font-weight: 600;
+            line-height: 1.28;
+            margin-top: 2.25rem;
+            margin-bottom: 0.85rem;
+            letter-spacing: -0.015em;
+        }
+
+        h1 { font-size: 2.25rem; margin-top: 0; }
+        h2 { font-size: 1.65rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.35rem; }
+        h3 { font-size: 1.3rem; }
+        h4 { font-size: 1.1rem; font-family: var(--font-sans); font-weight: 600; }
+
+        p {
+            margin: 1.2rem 0;
+            color: var(--text-primary);
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 3px;
+            transition: color 0.15s ease, text-decoration-color 0.15s ease;
+        }
+
+        a:hover {
+            color: var(--accent-hover);
+            text-decoration-thickness: 2px;
+        }
+
+        /* Hero / Introduction on Homepage */
+        .hero-section {
+            margin-bottom: 2.75rem;
+            padding-bottom: 2.25rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .hero-lead {
+            font-family: var(--font-serif);
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            margin-top: 0.6rem;
+        }
+
+        .hero-bio {
+            color: var(--text-secondary);
+            font-size: 0.98rem;
+            line-height: 1.75;
             margin-top: 1rem;
         }
-        nav a {
-            color: white;
+
+        /* Post Lists on Homepage */
+        .section-heading {
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-heading::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        .post-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .post-card {
+            display: block;
             text-decoration: none;
-            margin: 0 1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        nav a:hover {
-            background-color: rgba(255,255,255,0.2);
-        }
-        main {
-            max-width: 1100px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-            background: white;
+            padding: 1.35rem 1.45rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            padding: 2rem;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
         }
-        .content {
-            max-width: 1040px;
-            margin: 0 auto;
+
+        .post-card:hover {
+            border-color: var(--border-strong);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            transform: translateY(-1px);
         }
+
+        .post-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .post-card-title {
+            font-family: var(--font-serif);
+            font-size: 1.28rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            line-height: 1.35;
+        }
+
+        .post-card:hover .post-card-title {
+            color: var(--accent);
+        }
+
+        .post-tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.65rem;
+        }
+
+        .post-tag {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.5rem;
+            background: var(--tag-bg);
+            color: var(--tag-text);
+            border-radius: 4px;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        /* Post Layout Elements */
+        .post-header {
+            margin-bottom: 2.25rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .back-nav {
+            margin-bottom: 1.25rem;
+        }
+
+        .back-nav a {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .back-nav a:hover {
+            color: var(--accent);
+        }
+
+        .post-title {
+            font-size: 2.35rem;
+            line-height: 1.22;
+            margin: 0 0 0.85rem 0;
+        }
+
+        .post-meta {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+        }
+
+        /* Inline Code & Code Blocks */
+        code {
+            font-family: var(--font-mono);
+            font-size: 0.88em;
+            background-color: var(--bg-code-inline);
+            padding: 0.15rem 0.35rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+        }
+
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            color: inherit;
+        }
+
         .highlight {
-            background: #0b1220;
-            color: #cbd5e1;
-            padding: 1rem;
+            background: var(--code-block-bg);
+            border: 1px solid var(--code-block-border);
             border-radius: 8px;
-            overflow: auto;
-            margin: 1rem 0;
-            font-family: 'Source Code Pro', 'Fira Code', Menlo, Monaco, monospace;
-            font-size: 0.95rem;
-            line-height: 1.5;
+            padding: 1.15rem 1.25rem;
+            overflow-x: auto;
+            margin: 1.6rem 0;
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            color: #d1d5db;
         }
-        .highlight pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
-        .k { color: #ff7b72; }
-        .kd { color: #ff7b72; }
-        .n { color: #cbd5e1; }
-        .na { color: #ffb86b; }
-        .nb { color: #ffd580; }
-        .nc { color: #7fffd4; }
-        .nf { color: #82b1ff; }
-        .nt { color: #7fffd4; }
-        .nv { color: #9cd37b; }
-        .v { color: #9cd37b; }
-        .o { color: #cbd5e1; }
-        .p { color: #cbd5e1; }
-        .m { color: #ffd580; }
-        .mi { color: #ffd580; }
-        .mf { color: #ffd580; }
-        .sh { color: #cbd5e1; }
-        .s { color: #f1fa8c; }
-        .sa { color: #f1fa8c; }
-        .sr { color: #f1fa8c; }
-        .ss { color: #f1fa8c; }
-        .c { color: #7c8c99; font-style: italic; }
-        .cm { color: #7c8c99; font-style: italic; }
-        .cp { color: #7c8c99; font-style: italic; }
-        .c1 { color: #7c8c99; font-style: italic; }
-        footer {
+
+        .highlight pre {
+            margin: 0;
+            white-space: pre;
+            word-break: normal;
+        }
+
+        /* Rouge Syntax Highlighting */
+        .k, .kd, .kr { color: #f472b6; font-weight: 500; }
+        .kn, .kp { color: #fb7185; }
+        .n { color: #e5e7eb; }
+        .na { color: #fbbf24; }
+        .nb { color: #38bdf8; }
+        .nc { color: #67e8f9; font-weight: 500; }
+        .nf, .fm { color: #93c5fd; }
+        .nt { color: #f472b6; }
+        .nv, .vc, .vg, .vi { color: #a7f3d0; }
+        .o, .ow { color: #cbd5e1; }
+        .p { color: #9ca3af; }
+        .m, .mi, .mf, .mh, .il { color: #fde047; }
+        .s, .sa, .sb, .sc, .dl, .sd, .s2, .se, .sh, .si, .sx, .sr, .s1, .ss { color: #86efac; }
+        .c, .ch, .cm, .cp, .cpf, .c1, .cs { color: #6b7280; font-style: italic; }
+
+        /* Blockquotes */
+        blockquote {
+            border-left: 3px solid var(--border-strong);
+            margin: 1.5rem 0;
+            padding: 0.5rem 0 0.5rem 1.25rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        blockquote p {
+            margin: 0.5rem 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            padding-left: 1.4rem;
+            margin: 1rem 0;
+        }
+
+        li {
+            margin-bottom: 0.45rem;
+        }
+
+        /* Figures & Images */
+        figure {
+            margin: 2.25rem 0;
             text-align: center;
-            padding: 1rem 0;
-            background: #333;
-            color: white;
-            margin-top: 2rem;
         }
-        h1, h2, h3 {
-            color: #333333;
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            border: 1px solid var(--border-subtle);
         }
-        a {
-            color: #667eea;
+
+        figcaption {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.65rem;
         }
-        a:hover {
-            text-decoration: underline;
-        }
+
+        /* Tables */
         table {
-            border-collapse: collapse;
             width: 100%;
-            margin: 1rem 0;
+            border-collapse: collapse;
+            margin: 1.75rem 0;
+            font-size: 0.92rem;
         }
+
         th, td {
-            border: 1px solid #ddd;
-            padding: 0.75rem;
+            padding: 0.7rem 0.85rem;
+            border: 1px solid var(--border-subtle);
             text-align: left;
         }
+
         th {
-            background-color: #667eea;
-            color: white;
+            background-color: var(--bg-subtle);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
+
         tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: rgba(0, 0, 0, 0.015);
         }
-        figure {
-            margin: 1.5rem 0;
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: var(--border-subtle);
+            margin: 2.5rem 0;
         }
-        figcaption {
-            color: #666;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
+
+        /* Prevent duplicate H1 in post content if author also wrote `# Title` */
+        .post-body > h1:first-child {
+            display: none;
         }
-        .architecture-diagram {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-            font-family: 'Source Code Pro', monospace;
+
+        /* Site Footer */
+        footer.site-footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 2.25rem 1.25rem;
+            background: var(--bg-canvas);
+        }
+
+        .footer-inner {
+            max-width: var(--content-width);
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
             font-size: 0.85rem;
-            overflow-x: auto;
-            margin: 1rem 0;
-            border: 1px solid #e0e0e0;
+            color: var(--text-muted);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.25rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>AI Blog</h1>
-        <nav>
-            <a href="/">Home</a>
-        </nav>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="brand-link">
+                <span class="brand-title">Deepak Swaminathan</span>
+                <span class="brand-subtitle">ML &amp; AI Systems</span>
+            </a>
+            <nav class="site-nav">
+                <a href="/">Home</a>
+                <a href="https://github.com/s23deepak" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://www.linkedin.com/in/deepak-swaminathan-90a707153/" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="/feed.xml" title="RSS Feed">RSS</a>
+            </nav>
+        </div>
     </header>
-    <main>
-        <div class="content">
-            <article>
-    <header>
-        <h1>Cold Start Optimization for Serverless LLM Deployment</h1>
-        <p>Posted on April 23, 2026</p>
+
+    <main class="site-main">
+        <article class="post">
+    <header class="post-header">
+        <div class="back-nav">
+            <a href="/">← Back to writings</a>
+        </div>
+        <h1 class="post-title">Cold Start Optimization for Serverless LLM Deployment</h1>
+        <div class="post-meta">
+            <span>April 23, 2026</span>
+            <span>·</span>
+            <span>6 min read</span>
+            <span>·</span>
+            <span class="post-tag-list">
+                <span class="post-tag">llm-inference</span><span class="post-tag">vllm</span><span class="post-tag">modal</span><span class="post-tag">gpu-optimization</span>
+            </span>
+        </div>
     </header>
-    <div>
+
+    <div class="post-body">
         <h1 id="cold-start-optimization-for-serverless-llm-deployment">Cold Start Optimization for Serverless LLM Deployment</h1>
 
 <p><strong>5 minutes → 5-10 seconds with GPU snapshots, sleep mode, and weight caching</strong></p>
@@ -442,13 +827,27 @@
   <li><a href="https://modal.com/docs/guide/gpu-snapshots">Modal GPU Snapshots</a></li>
   <li><a href="https://modal.com/docs/examples/ministral3_inference">Serverless Ministral 3 with vLLM and Modal</a></li>
 </ul>
+    </div>
 
+    <hr>
+    
+    <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <a href="/" style="font-family: var(--font-mono); font-size: 0.85rem;">← Back to all writings</a>
+        <span style="color: var(--text-muted); font-size: 0.85rem;">Deepak Swaminathan · ML &amp; AI Systems</span>
     </div>
 </article>
-        </div>
     </main>
-    <footer>
-        <p>&copy; 2026 AI Blog. Powered by Jekyll.</p>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div>&copy; 2026 Deepak Swaminathan. All rights reserved.</div>
+            <div class="footer-links">
+                <a href="https://github.com/s23deepak" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://www.linkedin.com/in/deepak-swaminathan-90a707153/" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="mailto:23.deepak.s@gmail.com">Contact</a>
+                <a href="/feed.xml">RSS</a>
+            </div>
+        </div>
     </footer>
 </body>
 </html>

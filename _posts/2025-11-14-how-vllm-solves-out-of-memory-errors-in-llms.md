@@ -2,6 +2,7 @@
 layout: post
 title: "How vLLM Solves Out-Of-Memory Errors in LLMs"
 date: 2025-11-14
+categories: [llm-inference, vllm, memory-optimization]
 ---
 
 # How vLLM Solves Out-Of-Memory Errors in LLMs

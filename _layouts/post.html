@@ -2,15 +2,35 @@
 layout: default
 ---
 
-<article>
-    <header>
-        <h1>{{ page.title }}</h1>
-        <p>Posted on {{ page.date | date: "%B %d, %Y" }}</p>
-        {% if page.categories %}
-        <p>Categories: {{ page.categories | join: ', ' }}</p>
-        {% endif %}
+<article class="post">
+    <header class="post-header">
+        <div class="back-nav">
+            <a href="/">← Back to writings</a>
+        </div>
+        <h1 class="post-title">{{ page.title }}</h1>
+        <div class="post-meta">
+            <span>{{ page.date | date: "%B %d, %Y" }}</span>
+            <span>·</span>
+            <span>{{ content | strip_html | number_of_words | divided_by: 200 | plus: 1 }} min read</span>
+            {% if page.categories and page.categories.size > 0 %}
+            <span>·</span>
+            <span class="post-tag-list">
+                {% for category in page.categories %}
+                <span class="post-tag">{{ category }}</span>
+                {% endfor %}
+            </span>
+            {% endif %}
+        </div>
     </header>
-    <div>
+
+    <div class="post-body">
         {{ content }}
+    </div>
+
+    <hr>
+    
+    <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <a href="/" style="font-family: var(--font-mono); font-size: 0.85rem;">← Back to all writings</a>
+        <span style="color: var(--text-muted); font-size: 0.85rem;">Deepak Swaminathan · ML &amp; AI Systems</span>
     </div>
 </article>

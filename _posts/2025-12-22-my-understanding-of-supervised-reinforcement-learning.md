@@ -1,3 +1,10 @@
+---
+layout: post
+title: "Supervised Reinforcement Learning (SRL): Fine-Tuning Reasoning Models Step by Step"
+date: 2025-12-22
+categories: [reinforcement-learning, reasoning, unsloth, srl]
+---
+
 # Supervised Reinforcement Learning (SRL): Fine-Tuning Reasoning Models Step by Step
 
 Training language models for **complex, multi-step reasoning** remains a fundamental challenge. In such tasks, a single incorrect intermediate step can derail the entire reasoning chain—even if many parts of the solution are correct. Unfortunately, most standard fine-tuning approaches fail to handle this gracefully.

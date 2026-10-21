@@ -2,6 +2,7 @@
 layout: post
 title: "AlphaZero with JAX-based Implementation"
 date: 2025-09-15
+categories: [reinforcement-learning, jax, alphazero]
 ---
 
 # AlphaZero with JAX-based Implementation

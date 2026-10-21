@@ -3,23 +3,34 @@ layout: default
 title: Home
 ---
 
-# Welcome to My AI Journey!
+<section class="hero-section">
+    <h1 style="margin-top: 0; margin-bottom: 0.5rem;">AI Engineering &amp; Research</h1>
+    <p class="hero-lead">
+        Notes on reasoning models, agentic workflows, inference optimization, and open-source AI systems.
+    </p>
+    <p class="hero-bio">
+        I am an ML engineer exploring reinforcement learning, scalable LLM inference, and agentic workflows. My current work spans Supervised Reinforcement Learning (SRL) with Unsloth, synthetic reasoning pipelines, and open-source contributions to Transformer Reinforcement Learning (TRL).
+    </p>
+</section>
 
-I'm an **AI enthusiast**, deeply curious about the inner workings of artificial intelligence. I'm constantly exploring new techniques that tackle emerging challenges in the field.
+<div class="section-heading">Selected Writings &amp; Technical Notes</div>
 
-In my journey so far, I've developed a Supervised Reinforcement Learning (SRL) fine-tuning framework using Unsloth, built custom data pipelines with Meta's Synthetic-Data-Kit and vLLM, and designed step-wise reward functions for dense RL. Currently, I'm contributing to the open-source Transformer Reinforcement Learning library—working to integrate SRL algorithms for broader adoption in the community.
-
-My interests span machine learning pipelines, large language models (LLMs), reinforcement learning, MLOps, and open-source AI systems. I’m especially excited about agentic AI, model optimization, cloud training workflows, and collaborative community projects.
-
-Here, I'll be sharing my learnings, insights, and discoveries as I dive deeper into the world of AI—including technical write-ups, project updates, and practical strategies.
-Feel free to explore and join the conversation!
-## Latest Posts
-
-<ul class="post-list">
+<div class="post-list">
 {% for post in site.posts %}
-  <li>
-    <a href="{{ post.url }}">{{ post.title }}</a>
-    <span class="date">{{ post.date | date: "%B %d, %Y" }}</span>
-  </li>
+  <a href="{{ post.url }}" class="post-card">
+    <div class="post-meta-row">
+      <span>{{ post.date | date: "%B %d, %Y" }}</span>
+      <span>·</span>
+      <span>{{ post.content | strip_html | number_of_words | divided_by: 200 | plus: 1 }} min read</span>
+    </div>
+    <h2 class="post-card-title">{{ post.title }}</h2>
+    {% if post.categories and post.categories.size > 0 %}
+    <div class="post-tag-list">
+      {% for tag in post.categories %}
+      <span class="post-tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </a>
 {% endfor %}
-</ul>
+</div>

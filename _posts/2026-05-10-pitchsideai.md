@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Building PitchSideAI: A Technical Walkthrough of an AI Football Broadcast Companion"
+date: 2026-05-10
 categories: [agentic-ai, sports-tech, vllm, websockets, multi-agent]
 ---
 
