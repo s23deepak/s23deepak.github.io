@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>https://s23deepak.github.io/2026/10/29/beyond-context-windows-how-agent-memory-makes-context-more-efficient.html</loc>
+<lastmod>2026-10-29T00:00:00+00:00</lastmod>
+</url>
+
+<url>
 <loc>https://s23deepak.github.io/2025/09/15/alphazero-with-jax-based-implementation.html</loc>
 <lastmod>2025-09-15T00:00:00+00:00</lastmod>
 </url>
@@ -15,10 +20,6 @@
 <url>
 <loc>https://s23deepak.github.io/2026/04/23/cold-start-optimization-for-serverless-llm-deployment.html</loc>
 <lastmod>2026-04-23T00:00:00+00:00</lastmod>
-</url>
-<url>
-<loc>https://s23deepak.github.io/2026/05/10/pitchsideai.html</loc>
-<lastmod>2026-05-10T00:00:00+00:00</lastmod>
 </url>
 <url>
 <loc>https://s23deepak.github.io/</loc>

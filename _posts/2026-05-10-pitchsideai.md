@@ -3,6 +3,7 @@ layout: post
 title: "Building PitchSideAI: A Technical Walkthrough of an AI Football Broadcast Companion"
 date: 2026-05-10
 categories: [agentic-ai, sports-tech, vllm, websockets, multi-agent]
+published: false
 ---
 
 Live football is a hard environment for AI products because the useful answer is almost never just a stat. A commentator might need the historical context behind a rivalry, a fan might want to know why a tactical shift matters, and a broadcast producer might need that insight at the exact moment the game changes.

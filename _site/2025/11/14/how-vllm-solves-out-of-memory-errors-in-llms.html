@@ -29,7 +29,7 @@
             --tag-text: #4a505b;
             --code-block-bg: #0f141c;
             --code-block-border: #1f2733;
-            --content-width: 740px;
+            --content-width: 920px;
             --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
             --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -472,6 +472,13 @@
         /* Prevent duplicate H1 in post content if author also wrote `# Title` */
         .post-body > h1:first-child {
             display: none;
+        }
+
+        .post-body p {
+            text-align: left;
+            hyphens: none;
+            -webkit-hyphens: none;
+            word-break: normal;
         }
 
         /* Site Footer */
