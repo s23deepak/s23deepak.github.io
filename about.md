@@ -41,7 +41,7 @@ class AboutMe:
     def contact_me(self):
         return {
             "Email": "23.deepak.s@gmail.com",
-            "LinkedIn": "[linkedin.com/in/deepak-swaminathan](https://www.linkedin.com/in/deepak-swaminathan-90a707153/)",
+            "LinkedIn": "[linkedin.com/in/deepak-s-90a707153](https://www.linkedin.com/in/deepak-s-90a707153/)",
             "Goal": "Ready to join a team tackling complex AI/ML challenges."
         }
 
