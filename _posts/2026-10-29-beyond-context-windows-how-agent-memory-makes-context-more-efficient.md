@@ -131,7 +131,7 @@ In [O'Reilly's Expert Showcase: Agent Memory](https://www.oreilly.com/live-event
 
 <figure>
     <img src="/assets/images/MongoDB Agent Memory Recap Loop .png" alt="MongoDB Agent Memory Recap Loop Architecture" style="max-width:100%;height:auto;display:block;margin:1.5rem auto;border-radius:8px;">
-    <figcaption>Pete Johnson's Recap Loop Architecture — Evaluating prior answers before retrieving additional context.</figcaption>
+    <figcaption>Pete Johnson's Recap Loop Architecture — Evaluating prior answers before retrieving additional context.<br><small style="color: var(--text-muted);">Source: <a href="https://learning.oreilly.com/videos/expert-showcase-agent/0642572428136/?utm_campaign=what-should-an-agent-remember&utm_medium=referral&utm_source=www.turingpost.com" target="_blank" rel="noopener">O’Reilly’s Expert Showcase: Agent Memory</a>. Illustrations are original slides from the speakers’ presentations, credited individually.</small></figcaption>
 </figure>
 
 ### How the Recap Loop Works
@@ -251,3 +251,5 @@ As I reflect on this architecture, one open question I keep coming back to is: *
 3. MongoDB Documentation — [Atlas Agent Engine](https://www.mongodb.com/docs/agentengine/).
 4. MongoDB Documentation — [Agent Memory Types](https://www.mongodb.com/docs/agentengine/add-features/memory-types/).
 5. MongoDB Documentation — [Memory Extraction & Reconciliation](https://www.mongodb.com/docs/agentengine/add-features/memory-extraction/).
+
+*Source: [O’Reilly’s Expert Showcase: Agent Memory](https://learning.oreilly.com/videos/expert-showcase-agent/0642572428136/?utm_campaign=what-should-an-agent-remember&utm_medium=referral&utm_source=www.turingpost.com). Illustrations are original slides from the speakers’ presentations, credited individually.*
