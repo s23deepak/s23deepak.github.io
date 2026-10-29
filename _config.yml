@@ -2,6 +2,7 @@ title: "Deepak Swaminathan"
 description: "ML/LLM Engineer — agentic workflows, RAG, vLLM inference, and practical AI write-ups."
 url: "https://s23deepak.github.io"
 baseurl: ""
+permalink: /:year/:month/:day/:title.html
 markdown: kramdown
 highlighter: rouge
 plugins:
