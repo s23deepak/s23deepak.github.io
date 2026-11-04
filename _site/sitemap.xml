@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>https://s23deepak.github.io/2026/11/04/the-state-of-agent-memory-from-remembering-to-reliable-execution.html</loc>
+<lastmod>2026-11-04T00:00:00+00:00</lastmod>
+</url>
+
+<url>
 <loc>https://s23deepak.github.io/2026/10/29/beyond-context-windows-how-agent-memory-makes-context-more-efficient.html</loc>
 <lastmod>2026-10-29T00:00:00+00:00</lastmod>
 </url>
